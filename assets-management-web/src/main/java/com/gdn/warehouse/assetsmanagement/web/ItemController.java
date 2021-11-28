@@ -52,7 +52,7 @@ public class ItemController {
    @RequestMapping(value = "/_get-all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
    private Mono<Response<List<GetItemWebResponse>>> getAllItem(MandatoryParameter mandatoryParameter){
       return commandExecutor.execute(GetAllItemCommand.class,toGetAllItemCommandRequest())
-            .map(dataPagingPair -> ResponseHelper.ok(toGetItemWebResponses(dataPagingPair.getLeft()),dataPagingPair.getRight()))
+            .map(dataPagingPair -> ResponseHelper.ok(dataPagingPair.getLeft(),dataPagingPair.getRight()))
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
    }
 

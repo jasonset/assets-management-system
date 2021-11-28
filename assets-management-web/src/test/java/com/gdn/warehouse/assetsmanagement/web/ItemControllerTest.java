@@ -19,6 +19,7 @@ import com.gdn.warehouse.assetsmanagement.web.model.request.GetItemWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateItemWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.generic.FilterAndPageRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.sort.GetItemSortWebRequest;
+import com.gdn.warehouse.assetsmanagement.web.model.response.GetItemWebResponse;
 import com.gdn.warehouse.assetsmanagement.web.model.response.ItemResponse;
 import io.restassured.RestAssured;
 import org.apache.commons.lang3.tuple.Pair;
@@ -62,6 +63,7 @@ public class ItemControllerTest {
    @Value("${local.server.port}")
    private int port;
 
+   private GetItemWebResponse getItemWebResponse;
    private ItemResponse itemResponse;
    private FilterAndPageRequest<GetItemWebRequest, GetItemSortWebRequest> request;
    private CreateItemWebRequest createItemWebRequest;
@@ -72,6 +74,7 @@ public class ItemControllerTest {
       MockitoAnnotations.initMocks(this);
       RestAssured.port = port;
 
+      getItemWebResponse = GetItemWebResponse.builder().code("CODE").name("NAME").build();
       itemResponse = ItemResponse.builder().code("CODE").name("NAME").build();
       request = new FilterAndPageRequest<>(new GetItemWebRequest(),
             GetItemSortWebRequest.builder().code("ASC").name("DESC").build(),1,1);
@@ -82,7 +85,7 @@ public class ItemControllerTest {
    @Test
    public void getAll() {
       when(commandExecutor.execute(eq(GetAllItemCommand.class),any(GetAllItemCommandRequest.class)))
-            .thenReturn(Mono.just(Pair.of(Arrays.asList(itemResponse), Paging.builder().build())));
+            .thenReturn(Mono.just(Pair.of(Arrays.asList(getItemWebResponse), Paging.builder().build())));
 
       given().header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .header("Accept", MediaType.APPLICATION_JSON_VALUE)

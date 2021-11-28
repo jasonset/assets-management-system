@@ -6,7 +6,6 @@ import com.gdn.warehouse.assetsmanagement.command.model.GetAllItemCommandRequest
 import com.gdn.warehouse.assetsmanagement.entity.Item;
 import com.gdn.warehouse.assetsmanagement.repository.custom.ItemCustomRepository;
 import com.gdn.warehouse.assetsmanagement.web.model.response.GetItemWebResponse;
-import com.gdn.warehouse.assetsmanagement.web.model.response.ItemResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,11 +26,11 @@ public class GetAllItemCommandImpl implements GetAllItemCommand {
    private ItemCustomRepository itemCustomRepository;
 
    @Override
-   public Mono<Pair<List<ItemResponse>, Paging>> execute(GetAllItemCommandRequest request) {
+   public Mono<Pair<List<GetItemWebResponse>, Paging>> execute(GetAllItemCommandRequest request) {
       return mono(()-> constructCriteria(request))
             .flatMap(criteria -> itemCustomRepository.findByCriteria(criteria,request.getLimit(),request.getPage(),
                   constructSort(request)))
-            .map(items -> Pair.of(toGetItemResponses(items.getContent()),getPagingForItem(items)));
+            .map(items -> Pair.of(toGetItemWebResponses(items.getContent()),getPagingForItem(items)));
    }
 
    private Criteria constructCriteria(GetAllItemCommandRequest request){
@@ -51,10 +50,16 @@ public class GetAllItemCommandImpl implements GetAllItemCommand {
       return Sort.by(Sort.Direction.fromString(request.getSortOrder()),request.getSortBy());
    }
 
-   private List<ItemResponse> toGetItemResponses(List<Item> itemList){
-      return itemList.stream().map(item ->
-         ItemResponse.builder().code(item.getItemCode()).name(item.getItemName()).build()
-      ).collect(Collectors.toList());
+   private List<GetItemWebResponse> toGetItemWebResponses(List<Item> itemList){
+      return itemList.stream().map(this::toGetItemWebResponse).collect(Collectors.toList());
+   }
+
+   private GetItemWebResponse toGetItemWebResponse(Item item){
+      return GetItemWebResponse.builder()
+            .code(item.getItemCode())
+            .name(item.getItemName())
+            .category(item.getCategory().name())
+            .build();
    }
 
    private Paging getPagingForItem(Page<Item> items){

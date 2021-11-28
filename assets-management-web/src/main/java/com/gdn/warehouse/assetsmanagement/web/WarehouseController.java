@@ -11,7 +11,6 @@ import com.gdn.warehouse.assetsmanagement.command.model.GetAllWarehouseCommandRe
 import com.gdn.warehouse.assetsmanagement.properties.AssetsManagementSchedulerProperties;
 import com.gdn.warehouse.assetsmanagement.web.model.AssetsManagementApiPath;
 import com.gdn.warehouse.assetsmanagement.web.model.response.GetWarehouseWebResponse;
-import com.gdn.warehouse.assetsmanagement.web.model.response.WarehouseResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = AssetsManagementApiPath.WAREHOUSE_BASE_PATH)
@@ -35,7 +33,7 @@ public class WarehouseController {
    @RequestMapping(value = "/_get-all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
    private Mono<Response<List<GetWarehouseWebResponse>>> getAllItem(MandatoryParameter mandatoryParameter){
       return commandExecutor.execute(GetAllWarehouseCommand.class,toGetAllWarehouseCommandRequest())
-            .map(dataPagingPair -> ResponseHelper.ok(toGetWarehouseWebResponses(dataPagingPair.getLeft()),dataPagingPair.getRight()))
+            .map(dataPagingPair -> ResponseHelper.ok(dataPagingPair.getLeft(),dataPagingPair.getRight()))
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
    }
 
@@ -47,13 +45,5 @@ public class WarehouseController {
             .sortOrder("asc").build();
    }
 
-   private List<GetWarehouseWebResponse> toGetWarehouseWebResponses(List<WarehouseResponse> warehouseResponses){
-      return warehouseResponses.stream().map(this::toGetWarehouseWebResponse).collect(Collectors.toList());
-   }
 
-   private GetWarehouseWebResponse toGetWarehouseWebResponse(WarehouseResponse warehouseResponse){
-      return GetWarehouseWebResponse.builder()
-            .code(warehouseResponse.getCode())
-            .name(warehouseResponse.getName()).build();
-   }
 }

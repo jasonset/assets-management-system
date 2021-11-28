@@ -5,7 +5,7 @@ import com.gdn.warehouse.assetsmanagement.command.GetAllWarehouseCommand;
 import com.gdn.warehouse.assetsmanagement.command.model.GetAllWarehouseCommandRequest;
 import com.gdn.warehouse.assetsmanagement.entity.Warehouse;
 import com.gdn.warehouse.assetsmanagement.repository.custom.WarehouseCustomRepository;
-import com.gdn.warehouse.assetsmanagement.web.model.response.WarehouseResponse;
+import com.gdn.warehouse.assetsmanagement.web.model.response.GetWarehouseWebResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,11 +27,11 @@ public class GetAllWarehouseCommandImpl implements GetAllWarehouseCommand {
    private WarehouseCustomRepository warehouseCustomRepository;
 
    @Override
-   public Mono<Pair<List<WarehouseResponse>, Paging>> execute(GetAllWarehouseCommandRequest request) {
+   public Mono<Pair<List<GetWarehouseWebResponse>, Paging>> execute(GetAllWarehouseCommandRequest request) {
       return mono(()-> constructCriteria(request))
             .flatMap(criteria -> warehouseCustomRepository.findByCriteria(criteria,request.getLimit(), request.getPage(),
                   constructSort(request)))
-            .map(warehouses -> Pair.of(toGetWarehouseResponses(warehouses.getContent()),getPagingForWarehouse(warehouses)));
+            .map(warehouses -> Pair.of(toGetWarehouseWebResponses(warehouses.getContent()),getPagingForWarehouse(warehouses)));
    }
 
    private Criteria constructCriteria(GetAllWarehouseCommandRequest request){
@@ -51,16 +51,20 @@ public class GetAllWarehouseCommandImpl implements GetAllWarehouseCommand {
       return Sort.by(Sort.Direction.fromString(request.getSortOrder()),request.getSortBy());
    }
 
-   private List<WarehouseResponse> toGetWarehouseResponses(List<Warehouse> warehouseList){
-      return warehouseList.stream().map(warehouse ->
-            WarehouseResponse.builder().code(warehouse.getWarehouseCode()).name(warehouse.getWarehouseName()).build()
-      ).collect(Collectors.toList());
-   }
-
    private Paging getPagingForWarehouse(Page<Warehouse> warehouses){
       return Paging.builder().page(Long.valueOf(warehouses.getNumber()+1))
             .totalPage(Long.valueOf(warehouses.getTotalPages()))
             .itemPerPage(Long.valueOf(warehouses.getSize()))
             .totalItem(warehouses.getTotalElements()).build();
+   }
+
+   private List<GetWarehouseWebResponse> toGetWarehouseWebResponses(List<Warehouse> warehouseList){
+      return warehouseList.stream().map(this::toGetWarehouseWebResponse).collect(Collectors.toList());
+   }
+
+   private GetWarehouseWebResponse toGetWarehouseWebResponse(Warehouse warehouse){
+      return GetWarehouseWebResponse.builder()
+            .code(warehouse.getWarehouseCode())
+            .name(warehouse.getWarehouseName()).build();
    }
 }

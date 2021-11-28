@@ -4,12 +4,10 @@ import com.blibli.oss.backend.command.executor.CommandExecutor;
 import com.blibli.oss.backend.common.model.response.Paging;
 import com.blibli.oss.backend.mandatoryparameter.swagger.properties.MandatoryParameterProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gdn.warehouse.assetsmanagement.command.GetAllItemCommand;
 import com.gdn.warehouse.assetsmanagement.command.GetAllWarehouseCommand;
-import com.gdn.warehouse.assetsmanagement.command.model.GetAllItemCommandRequest;
 import com.gdn.warehouse.assetsmanagement.command.model.GetAllWarehouseCommandRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.AssetsManagementApiPath;
-import com.gdn.warehouse.assetsmanagement.web.model.response.WarehouseResponse;
+import com.gdn.warehouse.assetsmanagement.web.model.response.GetWarehouseWebResponse;
 import io.restassured.RestAssured;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -53,20 +51,20 @@ public class WarehouseControllerTest {
    @Value("${local.server.port}")
    private int port;
 
-   private WarehouseResponse warehouseResponse;
+   private GetWarehouseWebResponse getWarehouseWebResponse;
 
    @Before
    public void setUp() throws Exception {
       MockitoAnnotations.initMocks(this);
       RestAssured.port = port;
 
-      warehouseResponse = WarehouseResponse.builder().code("CODE").name("NAME").build();
+      getWarehouseWebResponse = GetWarehouseWebResponse.builder().code("CODE").name("NAME").build();
    }
 
    @Test
    public void getAll() {
       when(commandExecutor.execute(eq(GetAllWarehouseCommand.class),any(GetAllWarehouseCommandRequest.class)))
-            .thenReturn(Mono.just(Pair.of(Arrays.asList(warehouseResponse), Paging.builder().build())));
+            .thenReturn(Mono.just(Pair.of(Arrays.asList(getWarehouseWebResponse), Paging.builder().build())));
 
       given().header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .header("Accept", MediaType.APPLICATION_JSON_VALUE)
