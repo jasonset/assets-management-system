@@ -39,7 +39,7 @@ public class GetTransferAssetCommandImpl implements GetTransferAssetCommand {
       return transferAssetCustomRepository.findByCriteria(constructCriteriaRequest(request), request.getLimit(), request.getPage(),
             constructSort(request.getSortBy()))
             .flatMap(transferAssets -> getAllItems(transferAssets.getContent())
-                  .map(itemMap -> Pair.of(toGetTransferAssetWebResponse(transferAssets.getContent(),itemMap),getPaginationForAsset(transferAssets))));
+                  .map(itemMap -> Pair.of(toGetTransferAssetWebResponse(transferAssets.getContent(),itemMap),getPaginationForTransferAsset(transferAssets))));
    }
 
    private Sort constructSort(List<SortBy> sortBy){
@@ -78,7 +78,7 @@ public class GetTransferAssetCommandImpl implements GetTransferAssetCommand {
                   .transferAssetType(transferAsset.getTransferAssetType().name()).build()).collect(Collectors.toList());
    }
 
-   private Paging getPaginationForAsset(Page<TransferAsset> transferAssets){
+   private Paging getPaginationForTransferAsset(Page<TransferAsset> transferAssets){
       return Paging.builder().itemPerPage((long)transferAssets.getSize())
             .page((long)transferAssets.getNumber()+1)
             .totalItem(transferAssets.getTotalElements())
