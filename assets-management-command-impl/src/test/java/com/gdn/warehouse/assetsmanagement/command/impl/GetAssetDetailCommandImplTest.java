@@ -42,7 +42,7 @@ public class GetAssetDetailCommandImplTest {
 
       commandRequest = GetAssetDetailCommandRequest.builder().assetNumber("ASSET-NUMBER").build();
       asset = Asset.builder().status(AssetStatus.NORMAL).organisation(Organisation.DJARUM)
-            .purchase(Purchase.BUY).price(100000).category(AssetCategory.MHE).dipinjam(Boolean.TRUE)
+            .purchase(Purchase.BUY).price(100000).category(AssetCategory.MHE).inBorrow(Boolean.TRUE)
             .itemCode("ITEM-CODE").build();
       item = Item.builder().itemName("NAME").itemCode("ITEM-CODE").build();
    }

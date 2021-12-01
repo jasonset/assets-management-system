@@ -53,7 +53,12 @@ public class GenerateSequenceHelperImpl implements GenerateSequenceHelper {
    private Mono<DocumentSequence> generateDocumentSequence(String documentTemplate, DocumentType documentType,
                                                            GenerateAssetNumberRequest request) {
       String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
-      String year = LocalDate.now().format(DateTimeFormatter.ofPattern("yy"));
+      String year;
+      if(DocumentType.ITEM.equals(documentType)){
+         year = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
+      }else {
+         year = LocalDate.now().format(DateTimeFormatter.ofPattern("yy"));
+      }
 
       return getDocumentSequence(documentType,request)
             .map(documentSequence -> {

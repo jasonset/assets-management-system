@@ -8,13 +8,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gdn.warehouse.assetsmanagement.command.CancelMaintenanceReminderCommand;
 import com.gdn.warehouse.assetsmanagement.command.CreateMaintenanceReminderCommand;
 import com.gdn.warehouse.assetsmanagement.command.GetMaintenanceReminderCommand;
+import com.gdn.warehouse.assetsmanagement.command.UpdateMaintenanceReminderCommand;
 import com.gdn.warehouse.assetsmanagement.command.model.CancelMaintenanceReminderCommandRequest;
 import com.gdn.warehouse.assetsmanagement.command.model.CreateMaintenanceReminderCommandRequest;
 import com.gdn.warehouse.assetsmanagement.command.model.GetMaintenanceReminderCommandRequest;
+import com.gdn.warehouse.assetsmanagement.command.model.UpdateMaintenanceReminderCommandRequest;
 import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.web.model.AssetsManagementApiPath;
 import com.gdn.warehouse.assetsmanagement.web.model.request.CreateMaintenanceReminderWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.GetMaintenanceReminderWebRequest;
+import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateMaintenanceReminderWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.generic.FilterAndPageRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.sort.GetMaintenanceReminderSortWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.response.GetMaintenanceReminderWebResponse;
@@ -63,6 +66,7 @@ public class MaintenanceReminderControllerTest {
    private int port;
 
    private CreateMaintenanceReminderWebRequest createMaintenanceReminderWebRequest;
+   private UpdateMaintenanceReminderWebRequest updateMaintenanceReminderWebRequest;
    private FilterAndPageRequest<GetMaintenanceReminderWebRequest, GetMaintenanceReminderSortWebRequest> request;
    private MaintenanceReminder maintenanceReminder;
    private GetMaintenanceReminderWebResponse getMaintenanceReminderWebResponse;
@@ -75,9 +79,10 @@ public class MaintenanceReminderControllerTest {
       RestAssured.port = port;
 
       createMaintenanceReminderWebRequest = CreateMaintenanceReminderWebRequest.builder().build();
+      updateMaintenanceReminderWebRequest = UpdateMaintenanceReminderWebRequest.builder().build();
       request = new FilterAndPageRequest<>(new GetMaintenanceReminderWebRequest(),
             GetMaintenanceReminderSortWebRequest.builder().maintenanceReminderNumber("ASC")
-                  .scheduledDate("ASC").build(),1,1);
+                  .scheduledDate("ASC").previousExecutionTime("ASC").build(),1,1);
       maintenanceReminder = MaintenanceReminder.builder().maintenanceReminderNumber("NUMBER")
             .assetNumbers(Arrays.asList("NUMBER")).itemCode("CODE")
             .emailList(Arrays.asList("EMAIL")).scheduledDate(new Date()).interval(1).build();
@@ -100,6 +105,22 @@ public class MaintenanceReminderControllerTest {
             .statusCode(HttpStatus.OK.value());
 
       verify(commandExecutor).execute(eq(CreateMaintenanceReminderCommand.class),any(CreateMaintenanceReminderCommandRequest.class));
+   }
+
+   @Test
+   public void updateMaintenanceReminder() {
+      when(commandExecutor.execute(eq(UpdateMaintenanceReminderCommand.class),any(UpdateMaintenanceReminderCommandRequest.class)))
+            .thenReturn(Mono.just(Boolean.TRUE));
+
+      given().header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Accept", MediaType.APPLICATION_JSON_VALUE)
+            .body(updateMaintenanceReminderWebRequest)
+            .queryParam("requestId", 1001)
+            .post(AssetsManagementApiPath.MAINTENANCE_REMINDER_BASE_PATH+"/_update")
+            .then().body("status",equalTo(HttpStatus.OK.name()))
+            .statusCode(HttpStatus.OK.value());
+
+      verify(commandExecutor).execute(eq(UpdateMaintenanceReminderCommand.class),any(UpdateMaintenanceReminderCommandRequest.class));
    }
 
    @Test

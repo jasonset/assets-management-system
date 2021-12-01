@@ -14,4 +14,5 @@ import java.util.Date;
 public class GetMaintenanceReminderSortWebRequest {
    private String maintenanceReminderNumber;
    private String scheduledDate;
+   private String previousExecutionTime;
 }

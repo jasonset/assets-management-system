@@ -23,6 +23,7 @@ import com.gdn.warehouse.assetsmanagement.web.model.request.OnDeliveryTransferAs
 import com.gdn.warehouse.assetsmanagement.web.model.request.RejectMaintenanceWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateAssetWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateItemWebRequest;
+import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateMaintenanceReminderWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateMaintenanceWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.generic.FilterAndPageRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.sort.GetAssetSortWebRequest;
@@ -236,6 +237,15 @@ public class AssetsManagementClient extends GdnBaseRestCrudClient {
       URI uri = this.generateURI(AssetsManagementApiPath.MAINTENANCE_REMINDER_BASE_PATH+"/_create",requestId,
             additionalParameterMap,username);
       return this.invokePostType(uri, request, CreateMaintenanceReminderWebRequest.class, JSON_TYPE,
+            new TypeReference<Response<String>>() {});
+   }
+
+   public Response<String> updateMaintenanceReminder(String requestId, String username,
+                                                     UpdateMaintenanceReminderWebRequest request) throws Exception {
+      Map<String, String> additionalParameterMap = new HashMap<String, String>();
+      URI uri = this.generateURI(AssetsManagementApiPath.MAINTENANCE_REMINDER_BASE_PATH+"/_update",requestId,
+            additionalParameterMap,username);
+      return this.invokePostType(uri, request, UpdateMaintenanceReminderWebRequest.class, JSON_TYPE,
             new TypeReference<Response<String>>() {});
    }
 

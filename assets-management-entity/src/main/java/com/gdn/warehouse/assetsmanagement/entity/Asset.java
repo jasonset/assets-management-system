@@ -43,5 +43,5 @@ public class Asset extends BaseEntity{
    private Purchase purchase;
    private AssetCategory category;
    private Boolean hasReminder;
-   private Boolean dipinjam;
+   private Boolean inBorrow;
 }

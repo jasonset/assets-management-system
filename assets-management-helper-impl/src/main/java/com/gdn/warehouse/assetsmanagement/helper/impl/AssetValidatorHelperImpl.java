@@ -26,8 +26,7 @@ public class AssetValidatorHelperImpl implements AssetValidatorHelper {
    @Override
    public Mono<List<Asset>> validateAssetForMaintenanceReminder(List<String> assetNumbers) {
       return assetRepository.findByAssetNumberIn(assetNumbers)
-            .flatMap(this::validateReminder)
-            .flatMap(this::validateAsset).collectList()
+            .flatMap(this::validateReminder).collectList()
             .flatMap(assets -> validateAssetNameAndLocation(assets,assetNumbers));
    }
 

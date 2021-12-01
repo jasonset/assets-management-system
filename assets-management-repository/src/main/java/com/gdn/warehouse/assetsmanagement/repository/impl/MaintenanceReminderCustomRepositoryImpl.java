@@ -39,7 +39,11 @@ public class MaintenanceReminderCustomRepositoryImpl extends GenericCustomReposi
          criteria = criteria.and("scheduledDate").gte(request.getScheduledDateFilter())
                .lte(request.getScheduledDateFilter());
       }
-      criteria = criteria.and("enabled").is(Boolean.TRUE);
+      if(ObjectUtils.isNotEmpty(request.getPreviousExecutionTimeFilter())){
+         criteria = criteria.and("previousExecutionTime").gte(request.getPreviousExecutionTimeFilter())
+               .lte(request.getPreviousExecutionTimeFilter());
+      }
+      criteria = criteria.and("deleted").is(Boolean.FALSE);
 
       return criteria;
    }

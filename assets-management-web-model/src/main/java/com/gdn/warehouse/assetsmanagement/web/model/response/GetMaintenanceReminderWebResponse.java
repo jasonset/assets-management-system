@@ -19,4 +19,6 @@ public class GetMaintenanceReminderWebResponse {
    private Date scheduledDate;
    private Integer interval;
    private List<String> emailList;
+   private Boolean enabled;
+   private Date previousExecutionTime;
 }

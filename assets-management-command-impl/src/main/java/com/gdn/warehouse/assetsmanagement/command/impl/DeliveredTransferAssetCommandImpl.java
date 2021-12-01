@@ -55,7 +55,7 @@ public class DeliveredTransferAssetCommandImpl implements DeliveredTransferAsset
                asset.setStatus(AssetStatus.NORMAL);
                asset.setLocation(transferAsset.getDestination());
                if(TransferAssetType.RETURN.equals(transferAsset.getTransferAssetType())){
-                  asset.setDipinjam(Boolean.FALSE);
+                  asset.setInBorrow(Boolean.FALSE);
                }
                return asset;
             }).collectList()

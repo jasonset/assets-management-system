@@ -19,6 +19,7 @@ public class GetMaintenanceReminderCommandRequest {
    private String assetNumberFilter;
    private String itemCodeFilter;
    private Long scheduledDateFilter;
+   private Long previousExecutionTimeFilter;
    private Integer intervalFilter;
    private String emailFilter;
    @NotNull(message = "NotNull")

@@ -69,7 +69,7 @@ public class CreateAssetCommandImpl implements CreateAssetCommand {
                asset.setHasReminder(Boolean.FALSE);
                asset.setWarehouseCode(warehouse.getWarehouseCode());
                asset.setItemCode(request.getItemCode());
-               asset.setDipinjam(Boolean.FALSE);
+               asset.setInBorrow(Boolean.FALSE);
                return assetRepository.save(asset);
             });
    }

@@ -17,6 +17,7 @@ import com.gdn.warehouse.assetsmanagement.web.model.request.OnDeliveryTransferAs
 import com.gdn.warehouse.assetsmanagement.web.model.request.RejectMaintenanceWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateAssetWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateItemWebRequest;
+import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateMaintenanceReminderWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.UpdateMaintenanceWebRequest;
 import com.gdn.warehouse.assetsmanagement.web.model.request.generic.FilterAndPageRequest;
 import org.junit.Before;
@@ -261,6 +262,16 @@ public class AssetsManagementClientTest {
       Map<String,String> additionalParameterMap = new HashMap<>();
       String uri = AssetsManagementApiPath.MAINTENANCE_REMINDER_BASE_PATH+"/_create";
       assetsManagementClient.createMaintenanceReminder(REQUEST_ID,USERNAME,request);
+      verify(this.gdnHttpClientHelper).getURI(HOST,PORT,"/"+CONTEXT_PATH+uri,mandatoryRequestParam,
+            additionalParameterMap);
+   }
+
+   @Test
+   public void updateMaintenanceReminder() throws Exception {
+      UpdateMaintenanceReminderWebRequest request = UpdateMaintenanceReminderWebRequest.builder().build();
+      Map<String,String> additionalParameterMap = new HashMap<>();
+      String uri = AssetsManagementApiPath.MAINTENANCE_REMINDER_BASE_PATH+"/_update";
+      assetsManagementClient.updateMaintenanceReminder(REQUEST_ID,USERNAME,request);
       verify(this.gdnHttpClientHelper).getURI(HOST,PORT,"/"+CONTEXT_PATH+uri,mandatoryRequestParam,
             additionalParameterMap);
    }

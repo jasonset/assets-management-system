@@ -57,6 +57,7 @@ public class GetMaintenanceReminderCommandImpl implements GetMaintenanceReminder
             .assetNumberFilter(request.getAssetNumberFilter())
             .itemCodeFilter(request.getItemCodeFilter())
             .scheduledDateFilter(request.getScheduledDateFilter()==null?null:new Date(request.getScheduledDateFilter()))
+            .previousExecutionTimeFilter(request.getPreviousExecutionTimeFilter()==null?null:new Date(request.getPreviousExecutionTimeFilter()))
             .intervalFilter(request.getIntervalFilter())
             .emailFilter(request.getEmailFilter()).build();
    }
@@ -73,7 +74,9 @@ public class GetMaintenanceReminderCommandImpl implements GetMaintenanceReminder
                   .itemName(itemMap.get(maintenanceReminder.getItemCode()))
                   .emailList(maintenanceReminder.getEmailList())
                   .scheduledDate(maintenanceReminder.getScheduledDate())
-                  .interval(maintenanceReminder.getInterval()).build()).collect(Collectors.toList());
+                  .previousExecutionTime(maintenanceReminder.getPreviousExecutionTime())
+                  .interval(maintenanceReminder.getInterval())
+                  .enabled(maintenanceReminder.getEnabled()).build()).collect(Collectors.toList());
    }
 
    private Paging getPaginationForMaintenanceReminder(Page<MaintenanceReminder> maintenanceReminders){

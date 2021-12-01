@@ -4,18 +4,15 @@ import com.blibli.oss.backend.common.model.request.SortBy;
 import com.blibli.oss.backend.common.model.request.SortByDirection;
 import com.gdn.warehouse.assetsmanagement.command.model.GetMaintenanceReminderCommandRequest;
 import com.gdn.warehouse.assetsmanagement.entity.Item;
-import com.gdn.warehouse.assetsmanagement.entity.Maintenance;
 import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.repository.ItemRepository;
 import com.gdn.warehouse.assetsmanagement.repository.custom.MaintenanceReminderCustomRepository;
 import com.gdn.warehouse.assetsmanagement.repository.request.GetMaintenanceReminderCriteriaRequest;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,6 +20,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -70,6 +68,8 @@ public class GetMaintenanceReminderCommandImplTest {
             .assetNumbers(Arrays.asList("ASSET-NUMBER"))
             .itemCode("ITEM-CODE")
             .emailList(Arrays.asList("EMAIL"))
+            .previousExecutionTime(new Date())
+            .enabled(Boolean.TRUE)
             .interval(1).build();
       item = Item.builder().itemName("NAME").itemCode("CODE").build();
    }

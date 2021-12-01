@@ -35,7 +35,7 @@ public class GetAssetDetailCommandImpl implements GetAssetDetailCommand {
                      response.setOrganisation(asset.getOrganisation().name());
                      response.setPurchase(asset.getPurchase().name());
                      response.setCategory(asset.getCategory().name());
-                     response.setDipinjam(asset.getDipinjam()?"YA":"TIDAK");
+                     response.setDipinjam(asset.getInBorrow()?"YA":"TIDAK");
                      response.setItemName(item.getItemName());
                      response.setItemCode(item.getItemCode());
                      return Mono.just(response);

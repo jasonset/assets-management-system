@@ -30,4 +30,5 @@ public class MaintenanceReminder extends BaseEntity {
    private List<String> emailList;
    private Boolean enabled;
    private Date previousExecutionTime;
+   private Boolean deleted;
 }

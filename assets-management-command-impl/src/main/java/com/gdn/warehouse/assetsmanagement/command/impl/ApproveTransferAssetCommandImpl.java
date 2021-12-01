@@ -113,7 +113,7 @@ public class ApproveTransferAssetCommandImpl implements ApproveTransferAssetComm
                   assets.forEach(asset -> {
                      asset.setStatus(AssetStatus.ON_TRANSFER);
                      if(TransferAssetType.BORROW.equals(transferAsset.getTransferAssetType())){
-                        asset.setDipinjam(Boolean.TRUE);
+                        asset.setInBorrow(Boolean.TRUE);
                      }
                   });
                }else {

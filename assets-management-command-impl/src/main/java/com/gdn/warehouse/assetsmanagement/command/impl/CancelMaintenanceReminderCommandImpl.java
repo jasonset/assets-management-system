@@ -35,7 +35,7 @@ public class CancelMaintenanceReminderCommandImpl implements CancelMaintenanceRe
    public Mono<Boolean> execute(CancelMaintenanceReminderCommandRequest request) {
       return maintenanceReminderRepository.findByMaintenanceReminderNumber(request.getMaintenanceReminderNumber())
             .flatMap(maintenanceReminder -> {
-               maintenanceReminder.setEnabled(false);
+               maintenanceReminder.setDeleted(Boolean.TRUE);
                maintenanceReminder.setLastModifiedBy(request.getUsername());
                maintenanceReminder.setLastModifiedDate(new Date());
                return maintenanceReminderRepository.save(maintenanceReminder);

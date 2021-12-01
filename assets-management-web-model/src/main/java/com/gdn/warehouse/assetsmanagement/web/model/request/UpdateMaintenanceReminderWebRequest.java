@@ -5,16 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class GetMaintenanceReminderWebRequest {
+@NoArgsConstructor
+public class UpdateMaintenanceReminderWebRequest {
    private String maintenanceReminderNumber;
-   private String assetNumber;
-   private String itemCode;
+   private Boolean enabled;
+   private List<String> assetNumbers;
+   private List<String> emailList;
    private Integer interval;
    private Long scheduledDate;
-   private Long previousExecutionTime;
-   private String email;
 }

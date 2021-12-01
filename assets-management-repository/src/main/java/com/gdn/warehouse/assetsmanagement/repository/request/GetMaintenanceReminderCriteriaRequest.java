@@ -16,6 +16,7 @@ public class GetMaintenanceReminderCriteriaRequest {
    private String assetNumberFilter;
    private String itemCodeFilter;
    private Date scheduledDateFilter;
+   private Date previousExecutionTimeFilter;
    private Integer intervalFilter;
    private String emailFilter;
 }

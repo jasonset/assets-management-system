@@ -1,6 +1,5 @@
 package com.gdn.warehouse.assetsmanagement.repository.impl;
 
-import com.gdn.warehouse.assetsmanagement.entity.Maintenance;
 import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.repository.request.GetMaintenanceReminderCriteriaRequest;
 import org.junit.Assert;
@@ -20,7 +19,6 @@ import reactor.core.publisher.Mono;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -46,7 +44,7 @@ public class MaintenanceReminderCustomRepositoryImplTest {
       request = GetMaintenanceReminderCriteriaRequest.builder()
             .assetNumberFilter("ASSET-NUMBER").intervalFilter(1)
             .maintenanceReminderNumberFilter("MR-NUMBER").itemCodeFilter("ITEM-CODE")
-            .emailFilter("EMAIL").scheduledDateFilter(new Date()).build();
+            .emailFilter("EMAIL").scheduledDateFilter(new Date()).previousExecutionTimeFilter(new Date()).build();
       requestNoFilter = GetMaintenanceReminderCriteriaRequest.builder().build();
       sort = Sort.by(Sort.DEFAULT_DIRECTION,"test");
    }
