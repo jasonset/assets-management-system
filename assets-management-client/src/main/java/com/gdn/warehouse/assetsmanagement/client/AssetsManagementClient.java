@@ -240,13 +240,13 @@ public class AssetsManagementClient extends GdnBaseRestCrudClient {
             new TypeReference<Response<String>>() {});
    }
 
-   public Response<String> updateMaintenanceReminder(String requestId, String username,
+   public Response<Boolean> updateMaintenanceReminder(String requestId, String username,
                                                      UpdateMaintenanceReminderWebRequest request) throws Exception {
       Map<String, String> additionalParameterMap = new HashMap<String, String>();
       URI uri = this.generateURI(AssetsManagementApiPath.MAINTENANCE_REMINDER_BASE_PATH+"/_update",requestId,
             additionalParameterMap,username);
       return this.invokePostType(uri, request, UpdateMaintenanceReminderWebRequest.class, JSON_TYPE,
-            new TypeReference<Response<String>>() {});
+            new TypeReference<Response<Boolean>>() {});
    }
 
    public Response<Boolean> cancelMaintenanceReminder(String requestId, String username,
