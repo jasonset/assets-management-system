@@ -31,7 +31,7 @@ public class WarehouseController {
    private SchedulerHelper schedulerHelper;
 
    @RequestMapping(value = "/_get-all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-   private Mono<Response<List<GetWarehouseWebResponse>>> getAllItem(MandatoryParameter mandatoryParameter){
+   private Mono<Response<List<GetWarehouseWebResponse>>> getAllWarehouse(MandatoryParameter mandatoryParameter){
       return commandExecutor.execute(GetAllWarehouseCommand.class,toGetAllWarehouseCommandRequest())
             .map(dataPagingPair -> ResponseHelper.ok(dataPagingPair.getLeft(),dataPagingPair.getRight()))
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));

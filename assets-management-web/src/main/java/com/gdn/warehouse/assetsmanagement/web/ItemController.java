@@ -50,7 +50,7 @@ public class ItemController {
    private SchedulerHelper schedulerHelper;
 
    @RequestMapping(value = "/_get-all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-   private Mono<Response<List<GetItemWebResponse>>> getAllItem(MandatoryParameter mandatoryParameter){
+   public Mono<Response<List<GetItemWebResponse>>> getAllItem(MandatoryParameter mandatoryParameter){
       return commandExecutor.execute(GetAllItemCommand.class,toGetAllItemCommandRequest())
             .map(dataPagingPair -> ResponseHelper.ok(dataPagingPair.getLeft(),dataPagingPair.getRight()))
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
@@ -77,7 +77,7 @@ public class ItemController {
    }
 
    @RequestMapping(value = "/_get-all-item", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-   private Mono<Response<List<GetItemWebResponse>>> getAllItemWithFilter(MandatoryParameter mandatoryParameter,
+   public Mono<Response<List<GetItemWebResponse>>> getAllItemWithFilter(MandatoryParameter mandatoryParameter,
                                                                          @RequestBody FilterAndPageRequest<GetItemWebRequest, GetItemSortWebRequest> request){
       return commandExecutor.execute(GetAllItemWithFilterCommand.class,toGetAllItemWithFilterCommandRequest(request))
             .map(dataPagingPair -> ResponseHelper.ok(toGetItemWebResponses(dataPagingPair.getLeft()),dataPagingPair.getRight()))
@@ -112,7 +112,7 @@ public class ItemController {
    }
 
    @RequestMapping(value = "/_create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-   private Mono<Response<String>> createItem(MandatoryParameter mandatoryParameter,
+   public Mono<Response<String>> createItem(MandatoryParameter mandatoryParameter,
                                              @RequestBody CreateItemWebRequest request) throws Exception{
       return commandExecutor.execute(CreateItemCommand.class, toCreateItemCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
@@ -127,7 +127,7 @@ public class ItemController {
    }
 
    @RequestMapping(value = "/_update", method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
-   private Mono<Response<String>> updateItem(MandatoryParameter mandatoryParameter, @RequestBody UpdateItemWebRequest request) throws Exception{
+   public Mono<Response<String>> updateItem(MandatoryParameter mandatoryParameter, @RequestBody UpdateItemWebRequest request) throws Exception{
       return commandExecutor.execute(UpdateItemCommand.class, toUpdateItemCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
