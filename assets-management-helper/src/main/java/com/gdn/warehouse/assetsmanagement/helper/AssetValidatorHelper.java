@@ -1,7 +1,6 @@
 package com.gdn.warehouse.assetsmanagement.helper;
 
 import com.gdn.warehouse.assetsmanagement.entity.Asset;
-import com.gdn.warehouse.assetsmanagement.enums.AssetStatus;
 import reactor.core.publisher.Mono;
 
 import java.util.List;

@@ -96,7 +96,7 @@ public class AssetControllerTest {
    }
 
    @Test
-   public void createAsset() throws Exception{
+   public void createAsset() {
       when(commandExecutor.execute(eq(CreateAssetCommand.class),any(CreateAssetCommandRequest.class)))
             .thenReturn(Mono.just("CODE"));
 

@@ -50,7 +50,28 @@
 		<commons-collections4.version>4.1</commons-collections4.version>
 		<x-message.version>1.32.1-1</x-message.version>
 		<gdn-common-client-sdk.version>2.5.0-1</gdn-common-client-sdk.version>
-		<fasterxml.jackson.core.verison>2.9.9</fasterxml.jackson.core.verison>
+		<fasterxml.jackson.core.version>2.9.9</fasterxml.jackson.core.version>
+		<!--Sonar -->
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.language>java</sonar.language>
+		<sonar.coverage.exclusions>
+			src/main/java/com/gdn/warehouse/assetsmanagement/AssetsManagementApplication.java,
+			src/main/java/com/gdn/warehouse/assetsmanagement/command/*,
+			src/main/java/com/gdn/warehouse/assetsmanagement/command/helper/*,
+			src/main/java/com/gdn/warehouse/assetsmanagement/command/model/**,
+			src/main/java/com/gdn/warehouse/assetsmanagement/config/**,
+			src/main/java/com/gdn/warehouse/assetsmanagement/entity/**,
+			src/main/java/com/gdn/warehouse/assetsmanagement/helper/*,
+			src/main/java/com/gdn/warehouse/assetsmanagement/helper/model/*,
+			src/main/java/com/gdn/warehouse/assetsmanagement/helper/util/**,
+			src/main/java/com/gdn/warehouse/assetsmanagement/properties/**,
+			src/main/java/com/gdn/warehouse/assetsmanagement/repository/**,
+			src/main/java/com/gdn/warehouse/assetsmanagement/web/model/**,
+			src/main/java/com/gdn/warehouse/assetsmanagement/streaming/model/*,
+			src/main/java/com/gdn/warehouse/assetsmanagement/web/ExceptionController.java
+		</sonar.coverage.exclusions>
 	</properties>
 
 	<dependencies>
@@ -177,6 +198,11 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.4.0.905</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 				</plugin>
@@ -200,14 +226,23 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.5</version>
 				<executions>
+<!--					<execution>-->
+<!--						<id>report-aggregate</id>-->
+<!--						<goals>-->
+<!--							<goal>report-aggregate</goal>-->
+<!--						</goals>-->
+<!--						<phase>verify</phase>-->
+<!--					</execution>-->
 					<execution>
-						<id>report-aggregate</id>
+						<id>agent</id>
 						<goals>
-							<goal>report-aggregate</goal>
+							<goal>prepare-agent</goal>
 						</goals>
-						<phase>verify</phase>
 					</execution>
 				</executions>
+				<configuration>
+					<destFile>${sonar.jacoco.reportPath}</destFile>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

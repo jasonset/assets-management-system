@@ -50,7 +50,7 @@ public class AssetCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(Asset.class))).thenReturn(Flux.just(new Asset()));
       when(mongoOperations.count(any(Query.class),eq(Asset.class))).thenReturn(Mono.just(1L));
       Page<Asset> assets = repo.findByCriteria(requestNoFilter,1,1,sort).block();
-      Assert.assertEquals(assets.get().collect(Collectors.toList()).size(),1 );
+      Assert.assertEquals(1,assets.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(Asset.class));
       verify(mongoOperations).count(any(Query.class),eq(Asset.class));
    }
@@ -61,7 +61,7 @@ public class AssetCustomRepositoryImplTest {
       when(mongoOperations.count(any(Query.class),eq(Asset.class))).thenReturn(Mono.just(1L));
       Page<Asset> assets =
             repo.findByCriteria(request,1,1, sort).block();
-      Assert.assertEquals(assets.get().collect(Collectors.toList()).size(),0);
+      Assert.assertEquals(0,assets.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(Asset.class));
       verify(mongoOperations).count(any(Query.class),eq(Asset.class));
    }

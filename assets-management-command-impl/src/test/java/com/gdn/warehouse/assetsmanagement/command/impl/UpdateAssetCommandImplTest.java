@@ -82,9 +82,56 @@ public class UpdateAssetCommandImplTest {
       verify(assetRepository).findByAssetNumber(anyString());
    }
 
+   @Test
+   public void execute_success_value_null() {
+      commandRequest.setPoIssuedDate(null);
+      commandRequest.setPrice(null);
+      commandRequest.setDeliveryDate(null);
+      commandRequest.setVehiclePlate(null);
+      commandRequest.setNomorMesin(null);
+      commandRequest.setNomorRangka(null);
+      when(assetRepository.findByAssetNumber(anyString())).thenReturn(Mono.just(asset));
+      when(itemRepository.findByItemCode(anyString())).thenReturn(Mono.just(item));
+      when(warehouseRepository.findByWarehouseName(anyString())).thenReturn(Mono.just(warehouse));
+      when(assetRepository.save(any(Asset.class))).thenReturn(Mono.just(asset));
+      command.execute(commandRequest).block();
+      verify(assetRepository).save(any(Asset.class));
+      verify(itemRepository).findByItemCode(anyString());
+      verify(warehouseRepository).findByWarehouseName(anyString());
+      verify(assetRepository).findByAssetNumber(anyString());
+   }
+
    @Test(expected = CommandErrorException.class)
    public void execute_fail_ON_MAINTENANCE() {
       asset.setStatus(AssetStatus.ON_MAINTENANCE);
+      when(assetRepository.findByAssetNumber(anyString())).thenReturn(Mono.just(asset));
+      when(itemRepository.findByItemCode(anyString())).thenReturn(Mono.just(item));
+      when(warehouseRepository.findByWarehouseName(anyString())).thenReturn(Mono.just(warehouse));
+      when(assetRepository.save(any(Asset.class))).thenReturn(Mono.just(asset));
+      command.execute(commandRequest).block();
+      verify(assetRepository).save(any(Asset.class));
+      verify(itemRepository).findByItemCode(anyString());
+      verify(warehouseRepository).findByWarehouseName(anyString());
+      verify(assetRepository).findByAssetNumber(anyString());
+   }
+
+   @Test
+   public void execute_success_RUSAK_PARAH_SUDAH_BAC() {
+      asset.setStatus(AssetStatus.RUSAK_PARAH_SUDAH_BAC);
+      when(assetRepository.findByAssetNumber(anyString())).thenReturn(Mono.just(asset));
+      when(itemRepository.findByItemCode(anyString())).thenReturn(Mono.just(item));
+      when(warehouseRepository.findByWarehouseName(anyString())).thenReturn(Mono.just(warehouse));
+      when(assetRepository.save(any(Asset.class))).thenReturn(Mono.just(asset));
+      command.execute(commandRequest).block();
+      verify(assetRepository).save(any(Asset.class));
+      verify(itemRepository).findByItemCode(anyString());
+      verify(warehouseRepository).findByWarehouseName(anyString());
+      verify(assetRepository).findByAssetNumber(anyString());
+   }
+
+   @Test
+   public void execute_success_RUSAK_PARAH_BELUM_BAC() {
+      asset.setStatus(AssetStatus.RUSAK_PARAH_BELUM_BAC);
       when(assetRepository.findByAssetNumber(anyString())).thenReturn(Mono.just(asset));
       when(itemRepository.findByItemCode(anyString())).thenReturn(Mono.just(item));
       when(warehouseRepository.findByWarehouseName(anyString())).thenReturn(Mono.just(warehouse));

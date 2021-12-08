@@ -31,10 +31,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -55,30 +56,30 @@ public class AssetController {
    @Autowired
    private SchedulerHelper schedulerHelper;
 
-   @RequestMapping(value = "/_create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_create", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<String>> createAsset(MandatoryParameter mandatoryParameter,
-                                              @RequestBody CreateAssetWebRequest request) throws Exception {
+                                              @RequestBody CreateAssetWebRequest request) {
       return commandExecutor.execute(CreateAssetCommand.class,toCreateAssetCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
    }
 
-   private CreateAssetCommandRequest toCreateAssetCommandRequest(CreateAssetWebRequest request,String username) throws Exception {
+   private CreateAssetCommandRequest toCreateAssetCommandRequest(CreateAssetWebRequest request,String username) {
       CreateAssetCommandRequest commandRequest = CreateAssetCommandRequest.builder().build();
       BeanUtils.copyProperties(request,commandRequest);
       commandRequest.setUsername(username);
       return commandRequest;
    }
 
-   @RequestMapping(value = "/_update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_update", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<Boolean>> updateAsset(MandatoryParameter mandatoryParameter,
-                                              @RequestBody UpdateAssetWebRequest request) throws Exception {
+                                              @RequestBody UpdateAssetWebRequest request) {
       return commandExecutor.execute(UpdateAssetCommand.class,toUpdateAssetCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
    }
 
-   private UpdateAssetCommandRequest toUpdateAssetCommandRequest(UpdateAssetWebRequest request,String username) throws Exception {
+   private UpdateAssetCommandRequest toUpdateAssetCommandRequest(UpdateAssetWebRequest request,String username) {
       UpdateAssetCommandRequest commandRequest = UpdateAssetCommandRequest.builder().build();
       BeanUtils.copyProperties(request,commandRequest);
       commandRequest.setUsername(username);
@@ -86,7 +87,7 @@ public class AssetController {
    }
 
    @SneakyThrows
-   @RequestMapping(value = "/_get-detail/{assetNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+   @GetMapping(value = "/_get-detail/{assetNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<GetAssetDetailWebResponse>> getAssetDetail(MandatoryParameter mandatoryParameter, @PathVariable("assetNumber") String assetNumber) {
       assetNumber = URLDecoder.decode(assetNumber, StandardCharsets.UTF_8.toString());
       return commandExecutor.execute(GetAssetDetailCommand.class,toGetAssetDetailCommandRequest(assetNumber))
@@ -98,7 +99,7 @@ public class AssetController {
       return GetAssetDetailCommandRequest.builder().assetNumber(assetNumber).build();
    }
 
-   @RequestMapping(value = "/_get-all", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_get-all", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<List<GetAssetWebResponse>>> getAssets(MandatoryParameter mandatoryParameter,
          @RequestBody FilterAndPageRequest<GetAssetWebRequest, GetAssetSortWebRequest> request){
       return commandExecutor.execute(GetAssetCommand.class,toGetAssetCommandRequest(request))

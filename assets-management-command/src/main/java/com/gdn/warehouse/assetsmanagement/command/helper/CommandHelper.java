@@ -12,8 +12,6 @@ public interface CommandHelper {
    }
 
    default <T> Flux<T> flux(Supplier<Stream<T>> supplier) {
-      return Flux.from((s) -> {
-         Flux.fromStream((Stream)supplier.get());
-      });
+      return Flux.from(s -> Flux.fromStream((Stream)supplier.get()));
    }
 }

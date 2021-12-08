@@ -60,7 +60,7 @@ public class MaintenanceCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(Maintenance.class))).thenReturn(Flux.just(new Maintenance()));
       when(mongoOperations.count(any(Query.class),eq(Maintenance.class))).thenReturn(Mono.just(1L));
       Page<Maintenance> maintenances = repo.findByCriteria(requestNoFilter,1,1,sort).block();
-      Assert.assertEquals(maintenances.get().collect(Collectors.toList()).size(),1 );
+      Assert.assertEquals(1,maintenances.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(Maintenance.class));
       verify(mongoOperations).count(any(Query.class),eq(Maintenance.class));
    }
@@ -70,7 +70,7 @@ public class MaintenanceCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(Maintenance.class))).thenReturn(Flux.empty());
       when(mongoOperations.count(any(Query.class),eq(Maintenance.class))).thenReturn(Mono.just(1L));
       Page<Maintenance> maintenances = repo.findByCriteria(request,1,1, sort).block();
-      Assert.assertEquals(maintenances.get().collect(Collectors.toList()).size(),0);
+      Assert.assertEquals(0,maintenances.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(Maintenance.class));
       verify(mongoOperations).count(any(Query.class),eq(Maintenance.class));
    }
@@ -81,7 +81,7 @@ public class MaintenanceCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(Maintenance.class))).thenReturn(Flux.empty());
       when(mongoOperations.count(any(Query.class),eq(Maintenance.class))).thenReturn(Mono.just(1L));
       Page<Maintenance> maintenances = repo.findByCriteria(request,1,1, sort).block();
-      Assert.assertEquals(maintenances.get().collect(Collectors.toList()).size(),0);
+      Assert.assertEquals(0,maintenances.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(Maintenance.class));
       verify(mongoOperations).count(any(Query.class),eq(Maintenance.class));
    }
@@ -92,7 +92,7 @@ public class MaintenanceCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(Maintenance.class))).thenReturn(Flux.empty());
       when(mongoOperations.count(any(Query.class),eq(Maintenance.class))).thenReturn(Mono.just(1L));
       Page<Maintenance> maintenances = repo.findByCriteria(request,1,1, sort).block();
-      Assert.assertEquals(maintenances.get().collect(Collectors.toList()).size(),0);
+      Assert.assertEquals(0,maintenances.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(Maintenance.class));
       verify(mongoOperations).count(any(Query.class),eq(Maintenance.class));
    }

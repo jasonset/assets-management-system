@@ -3,6 +3,7 @@ package com.gdn.warehouse.assetsmanagement.helper.impl;
 import com.gdn.warehouse.assetsmanagement.entity.Schedule;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.CreateScheduleHelperRequest;
+import com.gdn.warehouse.assetsmanagement.properties.StringConstants;
 import com.gdn.warehouse.assetsmanagement.repository.ScheduleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ public class ScheduleHelperImpl implements ScheduleHelper {
       schedule.setInterval(request.getInterval());
       schedule.setEnabled(true);
       schedule.setLastExecutionTime(Objects.isNull(request.getLastExecutionTime())? schedule.getLastExecutionTime(): request.getLastExecutionTime());
-      schedule.setLastModifiedBy("SYSTEM");
+      schedule.setLastModifiedBy(StringConstants.SYSTEM);
       schedule.setLastModifiedDate(new Date());
       return schedule;
    }

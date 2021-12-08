@@ -1,6 +1,5 @@
 package com.gdn.warehouse.assetsmanagement.web.model.request;
 
-import com.gdn.warehouse.assetsmanagement.enums.AssetCategory;
 import com.gdn.warehouse.assetsmanagement.enums.AssetStatus;
 import com.gdn.warehouse.assetsmanagement.enums.Organisation;
 import com.gdn.warehouse.assetsmanagement.enums.Purchase;
@@ -9,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
 
 @Data
 @Builder

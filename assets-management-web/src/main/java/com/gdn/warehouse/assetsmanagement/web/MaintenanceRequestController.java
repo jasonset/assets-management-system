@@ -17,9 +17,9 @@ import com.gdn.warehouse.assetsmanagement.web.model.request.CreateMaintenanceReq
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -36,7 +36,7 @@ public class MaintenanceRequestController {
    @Autowired
    private SchedulerHelper schedulerHelper;
 
-   @RequestMapping(value = "/_create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_create", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<String>> createMaintenanceRequest(MandatoryParameter mandatoryParameter,
                                                           @RequestBody CreateMaintenanceRequestWebRequest request){
       return commandExecutor.execute(CreateMaintenanceRequestCommand.class,toCreateTransferAssetCommandRequest(request,mandatoryParameter.getUsername()))
@@ -55,7 +55,7 @@ public class MaintenanceRequestController {
             .username(username).build();
    }
 
-   @RequestMapping(value = "/_approve", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_approve", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<Boolean>> approveMaintenanceRequest(MandatoryParameter mandatoryParameter,
                                                             @RequestBody ApproveMaintenanceRequestWebRequest request){
       return commandExecutor.execute(ApproveMaintenanceRequestCommand.class,toApproveMaintenanceRequestCommandRequest(request,mandatoryParameter.getUsername()))

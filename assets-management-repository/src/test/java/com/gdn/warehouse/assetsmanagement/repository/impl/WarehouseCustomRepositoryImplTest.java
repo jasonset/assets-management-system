@@ -49,7 +49,7 @@ public class WarehouseCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(Warehouse.class))).thenReturn(Flux.just(new Warehouse()));
       when(mongoOperations.count(any(Query.class),eq(Warehouse.class))).thenReturn(Mono.just(1L));
       Page<Warehouse> warehouses = repo.findByCriteria(criteria,1,1,sort).block();
-      Assert.assertEquals(warehouses.get().collect(Collectors.toList()).size(),1);
+      Assert.assertEquals(1,warehouses.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(Warehouse.class));
       verify(mongoOperations).count(any(Query.class),eq(Warehouse.class));
    }

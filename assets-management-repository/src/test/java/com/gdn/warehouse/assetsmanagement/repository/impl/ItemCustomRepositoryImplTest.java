@@ -49,7 +49,7 @@ public class ItemCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(Item.class))).thenReturn(Flux.just(new Item()));
       when(mongoOperations.count(any(Query.class),eq(Item.class))).thenReturn(Mono.just(1L));
       Page<Item> items = repo.findByCriteria(criteria,1,1,sort).block();
-      Assert.assertEquals(items.get().collect(Collectors.toList()).size(),1);
+      Assert.assertEquals(1,items.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(Item.class));
       verify(mongoOperations).count(any(Query.class),eq(Item.class));
    }

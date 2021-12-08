@@ -11,6 +11,7 @@ import com.gdn.warehouse.assetsmanagement.enums.TransferAssetType;
 import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
 import com.gdn.warehouse.assetsmanagement.helper.TransferAssetHistoryHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.TransferAssetHistoryHelperRequest;
+import com.gdn.warehouse.assetsmanagement.properties.StringConstants;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.TransferAssetRepository;
 import lombok.AllArgsConstructor;
@@ -101,9 +102,9 @@ public class DeliveredTransferAssetCommandImpl implements DeliveredTransferAsset
                      .transferAssetType(TransferAssetType.RETURN)
                      .originWarehouseManagerEmail(transferAsset.getDestinationWarehouseManagerEmail())
                      .destinationWarehouseManagerEmail(transferAsset.getOriginWarehouseManagerEmail())
-                     .createdBy("SYSTEM")
+                     .createdBy(StringConstants.SYSTEM)
                      .createdDate(new Date())
-                     .lastModifiedBy("SYSTEM")
+                     .lastModifiedBy(StringConstants.SYSTEM)
                      .lastModifiedDate(new Date())
                      .referenceNumber(transferAsset.getTransferAssetNumber()).build()));
       }else {

@@ -40,10 +40,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -62,8 +63,8 @@ public class TransferAssetController {
    @Autowired
    private SchedulerHelper schedulerHelper;
 
-   @RequestMapping(value = "/_create",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-   public Mono<Response<String>> createTransferAsset(MandatoryParameter mandatoryParameter, @RequestBody CreateTransferAssetWebRequest request) throws Exception{
+   @PostMapping(value = "/_create", produces = MediaType.APPLICATION_JSON_VALUE)
+   public Mono<Response<String>> createTransferAsset(MandatoryParameter mandatoryParameter, @RequestBody CreateTransferAssetWebRequest request) {
       return commandExecutor.execute(CreateTransferAssetCommand.class,toCreateTransferAssetCommandRequest(request,mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
@@ -76,8 +77,8 @@ public class TransferAssetController {
       return commandRequest;
    }
 
-   @RequestMapping(value = "/_approve",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-   public Mono<Response<Boolean>> approveTransferAsset(MandatoryParameter mandatoryParameter, @RequestBody ApproveTransferAssetWebRequest request) throws Exception{
+   @PostMapping(value = "/_approve", produces = MediaType.APPLICATION_JSON_VALUE)
+   public Mono<Response<Boolean>> approveTransferAsset(MandatoryParameter mandatoryParameter, @RequestBody ApproveTransferAssetWebRequest request) {
       return commandExecutor.execute(ApproveTransferAssetCommand.class,toApproveTransferAssetCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
@@ -90,8 +91,8 @@ public class TransferAssetController {
       return commandRequest;
    }
 
-   @RequestMapping(value = "/_delivered", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-   public Mono<Response<Boolean>> deliveredTransferAsset(MandatoryParameter mandatoryParameter, @RequestBody DeliveredTransferAssetWebRequest request) throws Exception{
+   @PostMapping(value = "/_delivered", produces = MediaType.APPLICATION_JSON_VALUE)
+   public Mono<Response<Boolean>> deliveredTransferAsset(MandatoryParameter mandatoryParameter, @RequestBody DeliveredTransferAssetWebRequest request) {
       return commandExecutor.execute(DeliveredTransferAssetCommand.class,toDeliveredTransferAssetCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
@@ -104,8 +105,8 @@ public class TransferAssetController {
       return commandRequest;
    }
 
-   @RequestMapping(value = "/_on-delivery", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-   public Mono<Response<Boolean>> onDeliveryTransferAsset(MandatoryParameter mandatoryParameter, @RequestBody OnDeliveryTransferAssetWebRequest request) throws Exception{
+   @PostMapping(value = "/_on-delivery", produces = MediaType.APPLICATION_JSON_VALUE)
+   public Mono<Response<Boolean>> onDeliveryTransferAsset(MandatoryParameter mandatoryParameter, @RequestBody OnDeliveryTransferAssetWebRequest request) {
       return commandExecutor.execute(OnDeliveryTransferAssetCommand.class,toOnDeliveryTransferAssetCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));
@@ -119,7 +120,7 @@ public class TransferAssetController {
    }
 
    @SneakyThrows
-   @RequestMapping(value = "/_get-detail/{transferAssetNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+   @GetMapping(value = "/_get-detail/{transferAssetNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<GetTransferAssetDetailWebResponse>> getDetailTransferAsset(MandatoryParameter mandatoryParameter,
                                                                                    @PathVariable("transferAssetNumber") String transferAssetNumber) {
       transferAssetNumber = URLDecoder.decode(transferAssetNumber, StandardCharsets.UTF_8.toString());
@@ -132,7 +133,7 @@ public class TransferAssetController {
       return GetTransferAssetDetailCommandRequest.builder().transferAssetNumber(transferAssetNumber).build();
    }
 
-   @RequestMapping(value = "/_get-all", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_get-all", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<List<GetTransferAssetWebResponse>>> getTransferAssets(MandatoryParameter mandatoryParameter,
                                                                               @RequestBody FilterAndPageRequest<GetTransferAssetWebRequest, GetTransferAssetSortWebRequest> request){
       return commandExecutor.execute(GetTransferAssetCommand.class,toGetTransferAssetCommandRequest(request))
@@ -167,7 +168,7 @@ public class TransferAssetController {
    }
 
    @SneakyThrows
-   @RequestMapping(value = "/_get-all-history/{transferAssetNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+   @GetMapping(value = "/_get-all-history/{transferAssetNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<List<GetTransferAssetHistoryWebResponse>>> getTransferAssetHistory(MandatoryParameter mandatoryParameter,
                                                                                            @PathVariable("transferAssetNumber") String transferAssetNumber){
       transferAssetNumber = URLDecoder.decode(transferAssetNumber, StandardCharsets.UTF_8.toString());

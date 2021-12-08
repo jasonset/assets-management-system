@@ -39,7 +39,7 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaintenanceReminderScheduleCommand {
-   private final String commaDelimiter = ", ";
+   private static final String commaDelimiter = ", ";
 
    private MaintenanceReminderRepository maintenanceReminderRepository;
    private ScheduleRepository scheduleRepository;
@@ -63,7 +63,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
                      .flatMap(schedule -> {
                         tuple.getT1().setScheduledDate(newDate);
                         tuple.getT1().setPreviousExecutionTime(new Date());
-                        tuple.getT1().setLastModifiedBy("SYSTEM");
+                        tuple.getT1().setLastModifiedBy(StringConstants.SYSTEM);
                         tuple.getT1().setLastModifiedDate(new Date());
                         return maintenanceReminderRepository.save(tuple.getT1());
                      }).flatMap(maintenanceReminder -> assetRepository.findByAssetNumberIn(maintenanceReminder.getAssetNumbers()).collectList()
@@ -101,7 +101,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
             .flatMap(maintenanceNumber -> maintenanceRepository.save(Maintenance.builder()
                   .maintenanceNumber(maintenanceNumber)
                   .location(maintenanceReminder.getAssetLocation())
-                  .requester("SCHEDULED BY SYSTEM")
+                  .requester(StringConstants.SCHEDULED_BY_SYSTEM)
                   .assetNumbers(maintenanceReminder.getAssetNumbers())
                   .tanggalKerusakan(null)
                   .deskripsiKerusakan(null)
@@ -110,9 +110,9 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
                   .status(MaintenanceStatus.SCHEDULED)
 //                  .poNumber(maintenanceReminder.getAssetPoNumber())
 //                  .poIssuedDate(maintenanceReminder.getAssetPoIssuedDate())
-                        .createdBy("SYSTEM")
+                        .createdBy(StringConstants.SYSTEM)
                         .createdDate(new Date())
-                        .lastModifiedBy("SYSTEM")
+                        .lastModifiedBy(StringConstants.SYSTEM)
                         .lastModifiedDate(new Date())
                   .build()));
    }
@@ -138,8 +138,8 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
       Date newDate = new Date();
       LocalDate date = newDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
       LocalDate nextDate = maintenanceReminder.getScheduledDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      String dateStr = date.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy"));
-      String nextDateStr = nextDate.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy"));
+      String dateStr = date.format(DateTimeFormatter.ofPattern(StringConstants.EMAIL_DATE));
+      String nextDateStr = nextDate.format(DateTimeFormatter.ofPattern(StringConstants.EMAIL_DATE));
       Map<String, Object> variables = new HashMap<>();
       variables.put("maintenanceNumber",maintenanceNumber);
       variables.put("itemName",itemName);
@@ -176,8 +176,8 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
       Date newDate = new Date();
       LocalDate date = newDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
       LocalDate nextDate = maintenanceReminder.getScheduledDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      String dateStr = date.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy"));
-      String nextDateStr = nextDate.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy"));
+      String dateStr = date.format(DateTimeFormatter.ofPattern(StringConstants.EMAIL_DATE));
+      String nextDateStr = nextDate.format(DateTimeFormatter.ofPattern(StringConstants.EMAIL_DATE));
       Map<String, Object> variables = new HashMap<>();
       variables.put("maintenanceNumber","-");
       variables.put("itemName",itemName);

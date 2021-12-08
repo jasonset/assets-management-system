@@ -3,7 +3,6 @@ package com.gdn.warehouse.assetsmanagement.command.impl;
 import com.blibli.oss.backend.common.model.request.SortBy;
 import com.blibli.oss.backend.common.model.response.Paging;
 import com.gdn.warehouse.assetsmanagement.command.GetAllItemWithFilterCommand;
-import com.gdn.warehouse.assetsmanagement.command.model.GetAllItemCommandRequest;
 import com.gdn.warehouse.assetsmanagement.command.model.GetAllItemWithFilterCommandRequest;
 import com.gdn.warehouse.assetsmanagement.entity.Item;
 import com.gdn.warehouse.assetsmanagement.properties.StringConstants;

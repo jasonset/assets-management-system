@@ -35,10 +35,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -58,7 +59,7 @@ public class MaintenanceController {
    @Autowired
    private SchedulerHelper schedulerHelper;
 
-   @RequestMapping(value = "/_update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_update", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<UpdateMaintenanceWebResponse>> updateMaintenance(MandatoryParameter mandatoryParameter,
                                                                          @RequestBody UpdateMaintenanceWebRequest request){
       return commandExecutor.execute(UpdateMaintenanceCommand.class,toUpdateMaintenanceCommandRequest(request,mandatoryParameter.getUsername()))
@@ -73,7 +74,7 @@ public class MaintenanceController {
       return commandRequest;
    }
 
-   @RequestMapping(value = "/_reject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_reject", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<Boolean>> rejectMaintenance(MandatoryParameter mandatoryParameter,
                                                     @RequestBody RejectMaintenanceWebRequest request){
       return commandExecutor.execute(RejectMaintenanceCommand.class,toRejectMaintenanceCommandRequest(request, mandatoryParameter.getUsername()))
@@ -89,7 +90,7 @@ public class MaintenanceController {
    }
 
    @SneakyThrows
-   @RequestMapping(value = "/_get-detail/{maintenanceNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+   @GetMapping(value = "/_get-detail/{maintenanceNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<GetMaintenanceDetailWebResponse>> getDetailMaintenance(MandatoryParameter mandatoryParameter,
                                                                                @PathVariable("maintenanceNumber") String maintenanceNumber){
       maintenanceNumber = URLDecoder.decode(maintenanceNumber, StandardCharsets.UTF_8.toString());
@@ -103,7 +104,7 @@ public class MaintenanceController {
    }
 
    @SneakyThrows
-   @RequestMapping(value = "/_get-all-history/{maintenanceNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+   @GetMapping(value = "/_get-all-history/{maintenanceNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<List<GetMaintenanceHistoryWebResponse>>> getMaintenanceHistory(MandatoryParameter mandatoryParameter,
                                                                                        @PathVariable("maintenanceNumber") String maintenanceNumber){
       maintenanceNumber = URLDecoder.decode(maintenanceNumber, StandardCharsets.UTF_8.toString());
@@ -116,7 +117,7 @@ public class MaintenanceController {
       return GetMaintenanceHistoryCommandRequest.builder().maintenanceNumber(maintenanceNumber).build();
    }
 
-   @RequestMapping(value = "/_get-all", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_get-all", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<List<GetMaintenanceWebResponse>>> getMaintenances(MandatoryParameter mandatoryParameter,
                                                                           @RequestBody FilterAndPageRequest<GetMaintenanceWebRequest, GetMaintenanceSortWebRequest> request){
       return commandExecutor.execute(GetMaintenanceCommand.class,toGetMaintenanceCommandRequest(request))

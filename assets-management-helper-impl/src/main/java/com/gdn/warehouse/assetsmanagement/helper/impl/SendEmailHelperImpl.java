@@ -6,7 +6,6 @@ import com.gdn.x.message.service.client.MessageTemplateDeliveryClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 import com.gdn.warehouse.assetsmanagement.helper.model.SendEmailHelperRequest;
 
 @Slf4j

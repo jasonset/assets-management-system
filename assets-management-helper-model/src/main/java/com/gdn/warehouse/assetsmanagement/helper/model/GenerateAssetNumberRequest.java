@@ -1,7 +1,5 @@
 package com.gdn.warehouse.assetsmanagement.helper.model;
 
-import com.gdn.warehouse.assetsmanagement.enums.AssetCategory;
-import com.gdn.warehouse.assetsmanagement.enums.Organisation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -54,7 +54,7 @@ public class MaintenanceReminderCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(MaintenanceReminder.class))).thenReturn(Flux.just(new MaintenanceReminder()));
       when(mongoOperations.count(any(Query.class),eq(MaintenanceReminder.class))).thenReturn(Mono.just(1L));
       Page<MaintenanceReminder> maintenanceReminders = repo.findByCriteria(requestNoFilter,1,1,sort).block();
-      Assert.assertEquals(maintenanceReminders.get().collect(Collectors.toList()).size(),1 );
+      Assert.assertEquals(1,maintenanceReminders.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(MaintenanceReminder.class));
       verify(mongoOperations).count(any(Query.class),eq(MaintenanceReminder.class));
    }
@@ -64,7 +64,7 @@ public class MaintenanceReminderCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(MaintenanceReminder.class))).thenReturn(Flux.empty());
       when(mongoOperations.count(any(Query.class),eq(MaintenanceReminder.class))).thenReturn(Mono.just(1L));
       Page<MaintenanceReminder> maintenanceReminders = repo.findByCriteria(request,1,1, sort).block();
-      Assert.assertEquals(maintenanceReminders.get().collect(Collectors.toList()).size(),0);
+      Assert.assertEquals(0,maintenanceReminders.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(MaintenanceReminder.class));
       verify(mongoOperations).count(any(Query.class),eq(MaintenanceReminder.class));
    }

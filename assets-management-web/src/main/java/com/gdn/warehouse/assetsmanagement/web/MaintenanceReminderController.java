@@ -30,10 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -53,7 +54,7 @@ public class MaintenanceReminderController {
    @Autowired
    private SchedulerHelper schedulerHelper;
 
-   @RequestMapping(value = "/_create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_create", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<String>> createMaintenanceReminder(MandatoryParameter mandatoryParameter, @RequestBody CreateMaintenanceReminderWebRequest request){
       return commandExecutor.execute(CreateMaintenanceReminderCommand.class,toCreateMaintenanceRequestCommandRequest(request,mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
@@ -69,7 +70,7 @@ public class MaintenanceReminderController {
    }
 
    @SneakyThrows
-   @RequestMapping(value = "/_cancel/{maintenanceReminderNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+   @GetMapping(value = "/_cancel/{maintenanceReminderNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<Boolean>> cancelMaintenanceReminder(MandatoryParameter mandatoryParameter, @PathVariable("maintenanceReminderNumber") String maintenanceReminderNumber){
       maintenanceReminderNumber = URLDecoder.decode(maintenanceReminderNumber, StandardCharsets.UTF_8.toString());
       return commandExecutor.execute(CancelMaintenanceReminderCommand.class,toCancelMaintenanceReminderCommandRequest(maintenanceReminderNumber,mandatoryParameter.getUsername()))
@@ -82,7 +83,7 @@ public class MaintenanceReminderController {
             .maintenanceReminderNumber(maintenanceReminderNumber).username(username).build();
    }
 
-   @RequestMapping(value = "/_update",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_update", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<Boolean>> updateMaintenanceReminder(MandatoryParameter mandatoryParameter, @RequestBody UpdateMaintenanceReminderWebRequest request){
       return commandExecutor.execute(UpdateMaintenanceReminderCommand.class,toUpdateMaintenanceReminderCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
@@ -100,7 +101,7 @@ public class MaintenanceReminderController {
             .username(username).build();
    }
 
-   @RequestMapping(value = "/_get-all", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_get-all", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<List<GetMaintenanceReminderWebResponse>>> getReminders(MandatoryParameter mandatoryParameter,
                                                                                @RequestBody FilterAndPageRequest<GetMaintenanceReminderWebRequest, GetMaintenanceReminderSortWebRequest> request){
       return commandExecutor.execute(GetMaintenanceReminderCommand.class,toGetMaintenanceReminderCommandRequest(request))

@@ -60,7 +60,7 @@ public class TransferAssetCustomRepositoryImplTest {
       when(mongoTemplate.find(any(Query.class),eq(TransferAsset.class))).thenReturn(Flux.just(new TransferAsset()));
       when(mongoOperations.count(any(Query.class),eq(TransferAsset.class))).thenReturn(Mono.just(1L));
       Page<TransferAsset> TransferAssets = repo.findByCriteria(requestNoFilter,1,1,sort).block();
-      Assert.assertEquals(TransferAssets.get().collect(Collectors.toList()).size(),1 );
+      Assert.assertEquals(1,TransferAssets.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(TransferAsset.class));
       verify(mongoOperations).count(any(Query.class),eq(TransferAsset.class));
    }
@@ -71,7 +71,7 @@ public class TransferAssetCustomRepositoryImplTest {
       when(mongoOperations.count(any(Query.class),eq(TransferAsset.class))).thenReturn(Mono.just(1L));
       Page<TransferAsset> TransferAssets =
             repo.findByCriteria(request,1,1, sort).block();
-      Assert.assertEquals(TransferAssets.get().collect(Collectors.toList()).size(),0);
+      Assert.assertEquals(0,TransferAssets.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(TransferAsset.class));
       verify(mongoOperations).count(any(Query.class),eq(TransferAsset.class));
    }
@@ -83,7 +83,7 @@ public class TransferAssetCustomRepositoryImplTest {
       when(mongoOperations.count(any(Query.class),eq(TransferAsset.class))).thenReturn(Mono.just(1L));
       Page<TransferAsset> TransferAssets =
             repo.findByCriteria(request,1,1, sort).block();
-      Assert.assertEquals(TransferAssets.get().collect(Collectors.toList()).size(),0);
+      Assert.assertEquals(0,TransferAssets.get().collect(Collectors.toList()).size());
       verify(mongoTemplate).find(any(Query.class),eq(TransferAsset.class));
       verify(mongoOperations).count(any(Query.class),eq(TransferAsset.class));
    }

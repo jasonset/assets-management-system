@@ -48,7 +48,7 @@ public class MaintenanceRequestControllerTest {
       MockitoAnnotations.initMocks(this);
       RestAssured.port = port;
 
-      createMaintenanceRequestWebRequest = CreateMaintenanceRequestWebRequest.builder().build();
+      createMaintenanceRequestWebRequest = CreateMaintenanceRequestWebRequest.builder().tanggalKerusakan(1L).build();
       approveMaintenanceRequestWebRequest = ApproveMaintenanceRequestWebRequest.builder().build();
    }
 

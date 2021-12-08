@@ -136,6 +136,24 @@ public class MaintenanceControllerTest {
    }
 
    @Test
+   public void getAll_withoutSort() throws JsonProcessingException {
+      request.getSorts().setMaintenanceNumber(null);
+      request.getSorts().setTanggalLaporan(null);
+      when(commandExecutor.execute(eq(GetMaintenanceCommand.class),any(GetMaintenanceCommandRequest.class)))
+            .thenReturn(Mono.just(pair));
+
+      given().header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Accept", MediaType.APPLICATION_JSON_VALUE)
+            .body(objectMapper.writeValueAsString(request))
+            .queryParam("requestId", 1001)
+            .post(AssetsManagementApiPath.MAINTENANCE_BASE_PATH+"/_get-all")
+            .then().body("status",equalTo(HttpStatus.OK.name()))
+            .statusCode(HttpStatus.OK.value());
+
+      verify(commandExecutor).execute(eq(GetMaintenanceCommand.class),any(GetMaintenanceCommandRequest.class));
+   }
+
+   @Test
    public void getAll() throws JsonProcessingException {
       when(commandExecutor.execute(eq(GetMaintenanceCommand.class),any(GetMaintenanceCommandRequest.class)))
             .thenReturn(Mono.just(pair));

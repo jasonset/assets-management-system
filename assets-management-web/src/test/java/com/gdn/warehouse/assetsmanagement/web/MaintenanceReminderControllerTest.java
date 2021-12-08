@@ -140,6 +140,25 @@ public class MaintenanceReminderControllerTest {
    }
 
    @Test
+   public void getAll_withoutSort() throws JsonProcessingException {
+      request.getSorts().setMaintenanceReminderNumber(null);
+      request.getSorts().setScheduledDate(null);
+      request.getSorts().setPreviousExecutionTime(null);
+      when(commandExecutor.execute(eq(GetMaintenanceReminderCommand.class),any(GetMaintenanceReminderCommandRequest.class)))
+            .thenReturn(Mono.just(pair));
+
+      given().header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Accept", MediaType.APPLICATION_JSON_VALUE)
+            .body(objectMapper.writeValueAsString(request))
+            .queryParam("requestId", 1001)
+            .post(AssetsManagementApiPath.MAINTENANCE_REMINDER_BASE_PATH+"/_get-all")
+            .then().body("status",equalTo(HttpStatus.OK.name()))
+            .statusCode(HttpStatus.OK.value());
+
+      verify(commandExecutor).execute(eq(GetMaintenanceReminderCommand.class),any(GetMaintenanceReminderCommandRequest.class));
+   }
+
+   @Test
    public void getAll() throws JsonProcessingException {
       when(commandExecutor.execute(eq(GetMaintenanceReminderCommand.class),any(GetMaintenanceReminderCommandRequest.class)))
             .thenReturn(Mono.just(pair));

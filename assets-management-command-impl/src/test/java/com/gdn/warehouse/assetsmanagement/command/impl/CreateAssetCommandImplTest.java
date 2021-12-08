@@ -69,6 +69,21 @@ public class CreateAssetCommandImplTest {
    }
 
    @Test
+   public void test_createAsset_assetNumber_notExist_poIssued_deliveryDate() {
+      commandRequest.setDeliveryDate(1L);
+      commandRequest.setPoIssuedDate(1L);
+      when(assetRepository.save(any(Asset.class))).thenReturn(Mono.just(asset));
+      when(warehouseRepository.findByWarehouseName(anyString())).thenReturn(Mono.just(warehouse));
+      when(generateSequenceHelper.generateDocumentNumberForAsset(any(DocumentType.class),
+            any(GenerateAssetNumberRequest.class))).thenReturn(Mono.just("ASSET-NUMBER"));
+      command.execute(commandRequest).block();
+      verify(assetRepository).save(any(Asset.class));
+      verify(generateSequenceHelper).generateDocumentNumberForAsset(any(DocumentType.class),
+            any(GenerateAssetNumberRequest.class));
+      verify(warehouseRepository).findByWarehouseName(anyString());
+   }
+
+   @Test
    public void test_createAsset_assetNumber_exist() {
       commandRequest.setAssetNumber("ASSET-NUMBER");
       when(assetRepository.save(any(Asset.class))).thenReturn(Mono.just(asset));

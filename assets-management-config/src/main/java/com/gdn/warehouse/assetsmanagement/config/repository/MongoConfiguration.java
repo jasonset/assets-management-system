@@ -12,15 +12,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.MongoDbFactory;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.core.ReactiveMongoOperations;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory;
-import org.springframework.data.mongodb.core.convert.DbRefResolver;
-import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
-import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
 import java.util.Arrays;
@@ -70,14 +65,14 @@ public class MongoConfiguration {
 
    @Bean
    public ReactiveMongoTemplate reactiveMongoTemplate(@Qualifier("reactiveMongoClient") MongoClient reactiveMongoClient,
-                                                      MappingMongoConverter mappingMongoConverter) throws Exception {
+                                                      MappingMongoConverter mappingMongoConverter) {
       log.info("initializing mongo template: {} {}", reactiveMongoClient, mappingMongoConverter);
       return new ReactiveMongoTemplate(new SimpleReactiveMongoDatabaseFactory(reactiveMongoClient,
             mongoDBProperties.getDatabase()), mappingMongoConverter);
    }
 
    @Bean
-   public ReactiveMongoOperations reactiveMongoOperations(ReactiveMongoTemplate reactiveMongoTemplate) throws Exception {
+   public ReactiveMongoOperations reactiveMongoOperations(ReactiveMongoTemplate reactiveMongoTemplate) {
       return reactiveMongoTemplate;
    }
 }

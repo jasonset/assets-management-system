@@ -17,14 +17,17 @@ import com.gdn.warehouse.assetsmanagement.repository.ItemRepository;
 import com.gdn.warehouse.assetsmanagement.repository.MaintenanceReminderRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -98,4 +101,47 @@ public class CreateMaintenanceReminderCommandImplTest {
       verify(assetRepository).saveAll(anyList());
       verify(itemRepository).findByItemCode(anyString());
    }
+
+//   public int firstUniqChar(String str) {
+//      int[] charCount = new int[26];
+//      for (char c : str.toCharArray()) {
+//         charCount[c - 'a']++;
+//      }
+//      for(int i = 0; i < str.length(); i++)
+//      {
+//         if(charCount[str.charAt(i)-'a'] == 1)
+//            return i;
+//      }
+//      return -1;
+//   }
+//
+//   public void reverse(){
+//      List<String> colors = new ArrayList<>(Arrays.asList("RED", "BLUE", "BLACK"));
+//
+//      for (int i = 0, j = colors.size() - 1; i < j; i++) {
+//         colors.add(i, colors.remove(j));
+//      }
+//
+//      System.out.println(colors);
+//   }
+//
+//   public List<Integer> shiftByOne(List<Integer> soal,int shift){
+//      for (int i = 0;i<soal.size()-1;i++){
+//         soal.add(0,soal.remove(soal.size()-1));
+//      }
+//      System.out.println(soal);
+//      return soal;
+//   }
+//
+//   @Test
+//   public void test(){
+////      Assertions.assertEquals(0,firstUniqChar("qz"));
+////      reverse();
+//      List<Integer> list = new ArrayList<Integer>();
+//      list.add(1);
+//      list.add(2);
+//      list.add(3);
+//      shiftByOne(list,1);
+//   }
+
 }

@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public interface StringConstants {
-   String BLIBLI_TD = "BLIBLI-TD";
+   String SYSTEM = "SYSTEM";
+   String SCHEDULED_BY_SYSTEM = "SCHEDULED BY SYSTEM";
+   String EMAIL_DATE = "EEEE, dd MMMM yyyy";
 //   String SENDER_EMAIL_ASSETS_MANAGEMENT = "AssetsManagement@gdn-commerce.com";
    String SENDER_EMAIL_ASSETS_MANAGEMENT = "jason.setiadi@gdn-commerce.com";
    List<String> USER_EMAIL_LIST = Arrays.asList("ridha.ghassini@gdn-commerce.com","jessica.suradi@gdn-commerce.com",

@@ -2,6 +2,7 @@ package com.gdn.warehouse.assetsmanagement.command.impl;
 
 import com.gdn.warehouse.assetsmanagement.command.model.GetAllItemCommandRequest;
 import com.gdn.warehouse.assetsmanagement.entity.Item;
+import com.gdn.warehouse.assetsmanagement.enums.AssetCategory;
 import com.gdn.warehouse.assetsmanagement.repository.custom.ItemCustomRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public class GetAllItemCommandImplTest {
             .sortOrder("asc").build();
 
       item = Item.builder()
-            .itemName("name").itemCode("code").build();
+            .itemName("name").itemCode("code").category(AssetCategory.MHE).build();
    }
 
    @Test

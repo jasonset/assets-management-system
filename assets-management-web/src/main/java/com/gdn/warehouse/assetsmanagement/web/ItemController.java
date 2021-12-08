@@ -29,9 +29,10 @@ import com.gdn.warehouse.assetsmanagement.web.model.response.ItemResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -49,7 +50,7 @@ public class ItemController {
    @Autowired
    private SchedulerHelper schedulerHelper;
 
-   @RequestMapping(value = "/_get-all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+   @GetMapping(value = "/_get-all", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<List<GetItemWebResponse>>> getAllItem(MandatoryParameter mandatoryParameter){
       return commandExecutor.execute(GetAllItemCommand.class,toGetAllItemCommandRequest())
             .map(dataPagingPair -> ResponseHelper.ok(dataPagingPair.getLeft(),dataPagingPair.getRight()))
@@ -76,7 +77,7 @@ public class ItemController {
             .build();
    }
 
-   @RequestMapping(value = "/_get-all-item", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_get-all-item", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<List<GetItemWebResponse>>> getAllItemWithFilter(MandatoryParameter mandatoryParameter,
                                                                          @RequestBody FilterAndPageRequest<GetItemWebRequest, GetItemSortWebRequest> request){
       return commandExecutor.execute(GetAllItemWithFilterCommand.class,toGetAllItemWithFilterCommandRequest(request))
@@ -111,7 +112,7 @@ public class ItemController {
       return sortByList;
    }
 
-   @RequestMapping(value = "/_create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_create", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<String>> createItem(MandatoryParameter mandatoryParameter,
                                              @RequestBody CreateItemWebRequest request) throws Exception{
       return commandExecutor.execute(CreateItemCommand.class, toCreateItemCommandRequest(request, mandatoryParameter.getUsername()))
@@ -126,7 +127,7 @@ public class ItemController {
             .username(username).build();
    }
 
-   @RequestMapping(value = "/_update", method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
+   @PostMapping(value = "/_update",produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<String>> updateItem(MandatoryParameter mandatoryParameter, @RequestBody UpdateItemWebRequest request) throws Exception{
       return commandExecutor.execute(UpdateItemCommand.class, toUpdateItemCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)

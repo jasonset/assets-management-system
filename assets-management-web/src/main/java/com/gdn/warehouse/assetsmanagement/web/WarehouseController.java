@@ -13,8 +13,8 @@ import com.gdn.warehouse.assetsmanagement.web.model.AssetsManagementApiPath;
 import com.gdn.warehouse.assetsmanagement.web.model.response.GetWarehouseWebResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -30,7 +30,7 @@ public class WarehouseController {
    @Autowired
    private SchedulerHelper schedulerHelper;
 
-   @RequestMapping(value = "/_get-all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+   @GetMapping(value = "/_get-all", produces = MediaType.APPLICATION_JSON_VALUE)
    private Mono<Response<List<GetWarehouseWebResponse>>> getAllWarehouse(MandatoryParameter mandatoryParameter){
       return commandExecutor.execute(GetAllWarehouseCommand.class,toGetAllWarehouseCommandRequest())
             .map(dataPagingPair -> ResponseHelper.ok(dataPagingPair.getLeft(),dataPagingPair.getRight()))
