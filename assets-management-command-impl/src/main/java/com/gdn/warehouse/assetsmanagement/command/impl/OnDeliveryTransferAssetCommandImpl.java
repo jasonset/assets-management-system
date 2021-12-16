@@ -41,24 +41,22 @@ public class OnDeliveryTransferAssetCommandImpl implements OnDeliveryTransferAss
                transferAsset.setDeliveryDate(new Date(request.getDeliveryDate()));
                return transferAssetRepository.save(transferAsset);
             })
-            .flatMap(this::updateAssetStatus)
-            .flatMap(transferAsset -> saveToHistory(transferAsset,request))
+            .doOnSuccess(this::updateAssetStatus)
+            .doOnSuccess(transferAsset -> saveToHistory(transferAsset,request))
             .map(result -> Boolean.TRUE);
    }
 
-   private Mono<TransferAsset> updateAssetStatus(TransferAsset transferAsset){
-      return assetRepository.findByAssetNumberIn(transferAsset.getAssetNumbers())
-            .map(asset ->  {
+   private void updateAssetStatus(TransferAsset transferAsset){
+      assetRepository.findByAssetNumberIn(transferAsset.getAssetNumbers())
+            .map(asset -> {
                asset.setStatus(AssetStatus.ON_TRANSFER_DELIVERY);
                return asset;
             }).collectList()
-            .flatMap(assets -> assetRepository.saveAll(assets).collectList())
-            .map(result -> transferAsset);
+            .flatMap(assets -> assetRepository.saveAll(assets).collectList()).subscribe();
    }
 
-   private Mono<TransferAsset> saveToHistory(TransferAsset transferAsset, OnDeliveryTransferAssetCommandRequest request){
-      return transferAssetHistoryHelper.createTransferAssetHistory(toTransferAssetHistoryHelperRequest(transferAsset,request))
-            .map(result-> transferAsset);
+   private void saveToHistory(TransferAsset transferAsset, OnDeliveryTransferAssetCommandRequest request){
+      transferAssetHistoryHelper.createTransferAssetHistory(toTransferAssetHistoryHelperRequest(transferAsset,request)).subscribe();
    }
 
    private TransferAssetHistoryHelperRequest toTransferAssetHistoryHelperRequest(TransferAsset transferAsset, OnDeliveryTransferAssetCommandRequest request){

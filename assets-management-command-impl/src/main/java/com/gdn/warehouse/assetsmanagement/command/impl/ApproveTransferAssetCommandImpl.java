@@ -59,7 +59,7 @@ public class ApproveTransferAssetCommandImpl implements ApproveTransferAssetComm
             .flatMap(transferAsset -> itemRepository.findByItemCode(transferAsset.getItemCode())
                   .flatMap(item -> updateTransferAssetStatus(transferAsset,request,item)))
             .flatMap(transferAsset -> saveToHistory(transferAsset,request))
-            .flatMap(this::updateAssetStatus)
+            .doOnSuccess(this::updateAssetStatus)
             .map(result -> Boolean.TRUE);
    }
 
@@ -106,21 +106,26 @@ public class ApproveTransferAssetCommandImpl implements ApproveTransferAssetComm
             .build();
    }
 
-   private Mono<List<Asset>> updateAssetStatus(TransferAsset transferAsset){
-      return assetRepository.findByAssetNumberIn(transferAsset.getAssetNumbers()).collectList()
-            .flatMap(assets -> {
-               if(TransferAssetStatus.APPROVED.equals(transferAsset.getStatus())){
-                  assets.forEach(asset -> {
-                     asset.setStatus(AssetStatus.ON_TRANSFER);
-                     if(TransferAssetType.BORROW.equals(transferAsset.getTransferAssetType())){
-                        asset.setInBorrow(Boolean.TRUE);
-                     }
-                  });
-               }else {
-                  assets.forEach(asset -> asset.setStatus(AssetStatus.NORMAL));
-               }
-               return assetRepository.saveAll(assets).collectList();
-            });
+   private void updateAssetStatus(TransferAsset transferAsset){
+      if(TransferAssetStatus.APPROVED.equals(transferAsset.getStatus())){
+         if(TransferAssetType.BORROW.equals(transferAsset.getTransferAssetType())){
+            updateAssets(transferAsset.getAssetNumbers(),AssetStatus.ON_TRANSFER,Boolean.TRUE);
+         }else {
+            updateAssets(transferAsset.getAssetNumbers(),AssetStatus.ON_TRANSFER,Boolean.FALSE);
+         }
+      } else {
+         updateAssets(transferAsset.getAssetNumbers(),AssetStatus.NORMAL,Boolean.FALSE);
+      }
+   }
+
+   private void updateAssets(List<String> assetNumbers, AssetStatus newStatus, Boolean inBorrow){
+      assetRepository.findByAssetNumberIn(assetNumbers)
+            .map(asset -> {
+               asset.setStatus(newStatus);
+               asset.setInBorrow(inBorrow);
+               return asset;
+            }).collectList()
+            .flatMap(assets -> assetRepository.saveAll(assets).collectList()).subscribe();
    }
 
    private SendEmailHelperRequest toSendEmailHelperRequestWarehouseManagerDestination(TransferAsset transferAsset, String itemName){

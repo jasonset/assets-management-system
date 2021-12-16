@@ -50,16 +50,14 @@ public class ApproveMaintenanceRequestCommandImpl implements ApproveMaintenanceR
                maintenance.setLastModifiedDate(new Date());
                maintenance.setLastModifiedBy(request.getUsername());
                return maintenanceRepository.save(maintenance);
-            }).flatMap(maintenance -> assetRepository.findByAssetNumberIn(maintenance.getAssetNumbers()).collectList()
-                  .flatMap(assets -> {
-                     if(!MaintenanceStatus.REQUEST_DECLINED.equals(maintenance.getStatus())){
-                        assets.forEach(asset -> asset.setStatus(AssetStatus.PENDING_MAINTENANCE));
-                     }else {
-                        assets.forEach(asset -> asset.setStatus(AssetStatus.NORMAL));
-                     }
-                     return assetRepository.saveAll(assets).collectList()
-                           .flatMap(result -> maintenanceHistoryHelper.createMaintenanceHistory(toMaintenanceHistoryHelperRequest(maintenance)));
-                  }))
+            }).doOnSuccess(maintenance -> {
+               if (!MaintenanceStatus.REQUEST_DECLINED.equals(maintenance.getStatus())){
+                  updateAssets(maintenance.getAssetNumbers(),AssetStatus.PENDING_MAINTENANCE);
+               }else {
+                  updateAssets(maintenance.getAssetNumbers(),AssetStatus.NORMAL);
+               }
+            })
+            .doOnSuccess(maintenance -> maintenanceHistoryHelper.createMaintenanceHistory(toMaintenanceHistoryHelperRequest(maintenance)).subscribe())
             .flatMap(result -> Mono.just(Boolean.TRUE));
    }
 
@@ -79,6 +77,16 @@ public class ApproveMaintenanceRequestCommandImpl implements ApproveMaintenanceR
          return Mono.defer(()->Mono.just(maintenance));
       }
    }
+
+   private void updateAssets(List<String> assetNumbers, AssetStatus newStatus){
+      assetRepository.findByAssetNumberIn(assetNumbers)
+            .map(asset -> {
+               asset.setStatus(newStatus);
+               return asset;
+            }).collectList()
+            .flatMap(assets -> assetRepository.saveAll(assets).collectList()).subscribe();
+   }
+
 
    private MaintenanceHistoryHelperRequest toMaintenanceHistoryHelperRequest(Maintenance maintenance){
       return MaintenanceHistoryHelperRequest.builder().maintenanceNumber(maintenance.getMaintenanceNumber())

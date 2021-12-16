@@ -104,17 +104,18 @@ public class CreateMaintenanceRequestCommandImpl implements CreateMaintenanceReq
                   .createdBy(request.getUsername())
                   .createdDate(new Date())
                   .lastModifiedBy(request.getUsername())
-                  .lastModifiedDate(new Date()).build()
-            ).flatMap(maintenance -> {
-               assetList.forEach(asset1 -> asset1.setStatus(AssetStatus.PENDING_MAINTENANCE_REQUEST));
-               return assetRepository.saveAll(assetList).collectList()
-                     .map(assets -> Pair.of(maintenance, tuple.getT2()));
-                  })
-            );
+                  .lastModifiedDate(new Date()).build())
+                        .doOnSuccess(maintenance -> updateAssetStatus(assetList).subscribe())
+                        .map(maintenance -> Pair.of(maintenance,tuple.getT2())));
    }
 
    private Mono<String> getMaintenanceNumber(){
       return generateSequenceHelper.generateDocumentNumber(DocumentType.MAINTENANCE);
+   }
+
+   private Mono<List<Asset>> updateAssetStatus(List<Asset> assets){
+      assets.forEach(asset -> asset.setStatus(AssetStatus.PENDING_MAINTENANCE_REQUEST));
+      return assetRepository.saveAll(assets).collectList();
    }
 
    //TODO email user

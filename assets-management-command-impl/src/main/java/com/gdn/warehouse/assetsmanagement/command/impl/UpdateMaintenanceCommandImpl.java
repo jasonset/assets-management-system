@@ -92,7 +92,7 @@ public class UpdateMaintenanceCommandImpl implements UpdateMaintenanceCommand {
                                                 .doOnSuccess(item -> {
                                                       sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(maintenance1,item.getItemName()));
                                                       sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManager(maintenance1,item.getItemName()));
-                                                }).flatMap(item -> maintenanceHistoryHelper.createMaintenanceHistory(toMaintenanceHistoryHelperRequest(maintenance1)))
+                                                }).doOnSuccess(item -> maintenanceHistoryHelper.createMaintenanceHistory(toMaintenanceHistoryHelperRequest(maintenance1)).subscribe())
                                                 .flatMap(result -> mono(()->maintenance1)));
                                  });
                         }else {

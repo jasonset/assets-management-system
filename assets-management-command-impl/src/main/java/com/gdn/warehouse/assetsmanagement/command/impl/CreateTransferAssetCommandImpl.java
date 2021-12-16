@@ -111,11 +111,16 @@ public class CreateTransferAssetCommandImpl implements CreateTransferAssetComman
                   .createdDate(new Date())
                   .lastModifiedBy(request.getUsername())
                   .lastModifiedDate(new Date()).build())
-            ).flatMap(transferAsset -> {
-               assetList.forEach(asset -> asset.setStatus(AssetStatus.PENDING_TRANSFER));
-               return assetRepository.saveAll(assetList).collectList()
-                     .map(assets -> transferAsset);
-            });
+                  .doOnSuccess(transferAsset -> updateAssets(transferAsset.getAssetNumbers())));
+   }
+
+   private void updateAssets(List<String> assetNumbers){
+      assetRepository.findByAssetNumberIn(assetNumbers)
+            .map(asset -> {
+               asset.setStatus(AssetStatus.PENDING_TRANSFER);
+               return asset;
+            }).collectList()
+            .flatMap(assets -> assetRepository.saveAll(assets).collectList()).subscribe();
    }
 
    private SendEmailHelperRequest toSendEmailHelperRequestUser(Tuple3<TransferAsset, SystemParam, Item> tuple3){

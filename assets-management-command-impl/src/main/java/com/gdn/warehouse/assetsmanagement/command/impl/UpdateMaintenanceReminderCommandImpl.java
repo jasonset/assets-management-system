@@ -77,28 +77,34 @@ public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceRe
                      }).flatMap(assets -> {
                         if(!maintenanceReminder.getEnabled().equals(request.getEnabled())){
                            if (BooleanUtils.isTrue(request.getEnabled())){
-                              return scheduleHelper.saveSchedule(CreateScheduleHelperRequest.builder()
-                                          .identifier(maintenanceReminder.getMaintenanceReminderNumber())
-                                          .nextSchedule(new Date(request.getScheduledDate()))
-                                          .topic(AssetsManagementTopics.SCHEDULED_MAINTENANCE_REMINDER)
-                                          .payload(jsonHelper.toJson(MaintenanceReminderEvent.builder()
-                                                .maintenanceReminderNumber(maintenanceReminder.getMaintenanceReminderNumber()).build()))
-                                          .interval(request.getInterval())
-                                          .username(request.getUsername()).build())
-                                    .doOnSuccess(schedulerPlatformHelper::sendToSchedulerPlatform)
-                                    .flatMap(schedule -> updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode()));
+                              return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode())
+                                    .doOnSuccess(maintenanceReminder1 -> saveNewSchedule(maintenanceReminder1,request));
                            }else {
-                              return scheduleHelper.cancelSchedule(maintenanceReminder.getMaintenanceReminderNumber(),
-                                          ObjectUtils.isEmpty(maintenanceReminder.getPreviousExecutionTime())?null:maintenanceReminder.getPreviousExecutionTime())
-                                    .doOnSuccess(schedulerPlatformHelper::sendCancellationToSchedulerPlatform)
-                                    .flatMap(schedule -> updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode()));
+                              return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode())
+                                    .doOnSuccess(this::disableSchedule);
                            }
                         }else {
                            return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode());
                         }}).flatMap(result->mono(()->Boolean.TRUE));
                      });
+   }
 
+   private void saveNewSchedule(MaintenanceReminder maintenanceReminder,UpdateMaintenanceReminderCommandRequest request){
+      scheduleHelper.saveSchedule(CreateScheduleHelperRequest.builder()
+                  .identifier(maintenanceReminder.getMaintenanceReminderNumber())
+                  .nextSchedule(new Date(request.getScheduledDate()))
+                  .topic(AssetsManagementTopics.SCHEDULED_MAINTENANCE_REMINDER)
+                  .payload(jsonHelper.toJson(MaintenanceReminderEvent.builder()
+                        .maintenanceReminderNumber(maintenanceReminder.getMaintenanceReminderNumber()).build()))
+                  .interval(request.getInterval())
+                  .username(request.getUsername()).build())
+            .doOnSuccess(schedulerPlatformHelper::sendToSchedulerPlatform).subscribe();
+   }
 
+   private void disableSchedule(MaintenanceReminder maintenanceReminder){
+      scheduleHelper.cancelSchedule(maintenanceReminder.getMaintenanceReminderNumber(),
+                  ObjectUtils.isEmpty(maintenanceReminder.getPreviousExecutionTime())?null:maintenanceReminder.getPreviousExecutionTime())
+            .doOnSuccess(schedulerPlatformHelper::sendCancellationToSchedulerPlatform).subscribe();
    }
 
    private Mono<MaintenanceReminder> updateMaintenanceReminder(UpdateMaintenanceReminderCommandRequest request, MaintenanceReminder maintenanceReminder, List<String> assetNumbersRequest,

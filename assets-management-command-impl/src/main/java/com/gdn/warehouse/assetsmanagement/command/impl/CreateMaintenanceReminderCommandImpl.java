@@ -63,7 +63,7 @@ public class CreateMaintenanceReminderCommandImpl implements CreateMaintenanceRe
       return assetValidatorHelper.validateAssetForMaintenanceReminder(assetNumbers)
             .flatMap(assets -> itemRepository.findByItemCode(assets.get(0).getItemCode())
                   .flatMap(item -> createMaintenanceReminder(request,item.getItemCode(),assets.get(0),assets,assetNumbers)))
-            .flatMap(this::assignScheduleToSchedulerPlatform)
+            .doOnSuccess(this::assignScheduleToSchedulerPlatform)
             .map(MaintenanceReminder::getMaintenanceReminderNumber);
    }
 
@@ -102,10 +102,9 @@ public class CreateMaintenanceReminderCommandImpl implements CreateMaintenanceRe
             });
    }
 
-   private Mono<MaintenanceReminder> assignScheduleToSchedulerPlatform(MaintenanceReminder maintenanceReminder){
-      return scheduleHelper.saveSchedule(constructCreateScheduleHelperRequest(maintenanceReminder))
-            .doOnSuccess(schedulerPlatformHelper::sendToSchedulerPlatform)
-            .map(schedule -> maintenanceReminder);
+   private void assignScheduleToSchedulerPlatform(MaintenanceReminder maintenanceReminder){
+      scheduleHelper.saveSchedule(constructCreateScheduleHelperRequest(maintenanceReminder))
+            .doOnSuccess(schedulerPlatformHelper::sendToSchedulerPlatform).subscribe();
    }
 
    private CreateScheduleHelperRequest constructCreateScheduleHelperRequest(MaintenanceReminder maintenanceReminder){

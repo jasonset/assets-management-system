@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -44,35 +45,23 @@ public class DeliveredTransferAssetCommandImpl implements DeliveredTransferAsset
    public Mono<Boolean> execute(DeliveredTransferAssetCommandRequest request) {
       return transferAssetRepository.findByTransferAssetNumber(request.getTransferAssetNumber())
             .switchIfEmpty(Mono.defer(()->Mono.error(new CommandErrorException("Transfer Asset doesn't exist!", HttpStatus.BAD_REQUEST))))
-            .flatMap(transferAsset -> updateStatus(transferAsset,request))
-            .flatMap(transferAsset -> saveToHistory(transferAsset,request))
+            .flatMap(transferAsset -> updateTransferAssetStatus(transferAsset,request))
             .flatMap(this::createReturnTransferAsset)
+            .doOnSuccess(transferAsset -> updateAssets(transferAsset.getAssetNumbers(),transferAsset.getDestination(),transferAsset.getTransferAssetType()))
+            .doOnSuccess(transferAsset -> saveToHistory(transferAsset,request))
             .map(result -> Boolean.TRUE);
    }
 
-   private Mono<TransferAsset> updateStatus(TransferAsset transferAsset, DeliveredTransferAssetCommandRequest request){
-      return assetRepository.findByAssetNumberIn(transferAsset.getAssetNumbers())
-            .map(asset -> {
-               asset.setStatus(AssetStatus.NORMAL);
-               asset.setLocation(transferAsset.getDestination());
-               if(TransferAssetType.RETURN.equals(transferAsset.getTransferAssetType())){
-                  asset.setInBorrow(Boolean.FALSE);
-               }
-               return asset;
-            }).collectList()
-            .flatMap(assets -> assetRepository.saveAll(assets).collectList())
-            .flatMap(assets -> {
-               transferAsset.setArrivalDate(new Date(request.getArrivalDate()));
-               transferAsset.setStatus(TransferAssetStatus.DELIVERED);
-               transferAsset.setLastModifiedBy(request.getUsername());
-               transferAsset.setLastModifiedDate(new Date());
-               return transferAssetRepository.save(transferAsset);
-            });
+   private Mono<TransferAsset> updateTransferAssetStatus(TransferAsset transferAsset, DeliveredTransferAssetCommandRequest request){
+      transferAsset.setArrivalDate(new Date(request.getArrivalDate()));
+      transferAsset.setStatus(TransferAssetStatus.DELIVERED);
+      transferAsset.setLastModifiedBy(request.getUsername());
+      transferAsset.setLastModifiedDate(new Date());
+      return transferAssetRepository.save(transferAsset);
    }
 
-   private Mono<TransferAsset> saveToHistory(TransferAsset transferAsset, DeliveredTransferAssetCommandRequest request){
-      return transferAssetHistoryHelper.createTransferAssetHistory(toTransferAssetHistoryHelperRequest(transferAsset,request))
-            .map(result-> transferAsset);
+   private void saveToHistory(TransferAsset transferAsset, DeliveredTransferAssetCommandRequest request){
+      transferAssetHistoryHelper.createTransferAssetHistory(toTransferAssetHistoryHelperRequest(transferAsset,request)).subscribe();
    }
 
    private TransferAssetHistoryHelperRequest toTransferAssetHistoryHelperRequest(TransferAsset transferAsset, DeliveredTransferAssetCommandRequest request){
@@ -110,5 +99,18 @@ public class DeliveredTransferAssetCommandImpl implements DeliveredTransferAsset
       }else {
          return mono(()->transferAsset);
       }
+   }
+
+   private void updateAssets(List<String> assetNumbers, String location,TransferAssetType transferAssetType){
+      assetRepository.findByAssetNumberIn(assetNumbers)
+            .map(asset -> {
+               asset.setStatus(AssetStatus.NORMAL);
+               asset.setLocation(location);
+               if(TransferAssetType.RETURN.equals(transferAssetType)){
+                  asset.setInBorrow(Boolean.FALSE);
+               }
+               return asset;
+            }).collectList()
+            .flatMap(assets -> assetRepository.saveAll(assets).collectList()).subscribe();
    }
 }

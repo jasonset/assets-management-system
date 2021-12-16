@@ -83,6 +83,25 @@ public class ApproveTransferAssetCommandImplTest {
       verify(itemRepository).findByItemCode(anyString());
    }
 
+   @Test
+   public void execute_true_TA_normal() {
+      transferAsset.setTransferAssetType(TransferAssetType.NORMAL);
+      when(transferAssetRepository.findByTransferAssetNumber(anyString())).thenReturn(Mono.just(transferAsset));
+      when(transferAssetRepository.save(any(TransferAsset.class))).thenReturn(Mono.just(transferAsset));
+      when(assetRepository.findByAssetNumberIn(anyList())).thenReturn(Flux.just(asset));
+      when(assetRepository.saveAll(anyList())).thenReturn(Flux.just(asset));
+      when(transferAssetHistoryHelper.createTransferAssetHistory(any(TransferAssetHistoryHelperRequest.class)))
+            .thenReturn(Mono.just(Boolean.TRUE));
+      when(itemRepository.findByItemCode(anyString())).thenReturn(Mono.just(item));
+      command.execute(commandRequest).block();
+      verify(transferAssetRepository).findByTransferAssetNumber(anyString());
+      verify(transferAssetRepository).save(any(TransferAsset.class));
+      verify(assetRepository).findByAssetNumberIn(anyList());
+      verify(assetRepository).saveAll(anyList());
+      verify(transferAssetHistoryHelper).createTransferAssetHistory(any(TransferAssetHistoryHelperRequest.class));
+      verify(itemRepository).findByItemCode(anyString());
+   }
+
    @Test(expected = CommandErrorException.class)
    public void execute_true_on_delivery() {
       transferAsset.setStatus(TransferAssetStatus.ON_DELIVERY);

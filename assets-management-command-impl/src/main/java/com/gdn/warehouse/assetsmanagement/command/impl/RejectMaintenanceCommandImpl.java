@@ -46,12 +46,8 @@ public class RejectMaintenanceCommandImpl implements RejectMaintenanceCommand {
                maintenance.setLastModifiedBy(request.getUsername());
                maintenance.setLastModifiedDate(new Date());
                return maintenanceRepository.save(maintenance);
-            }).flatMap(maintenance -> assetRepository.findByAssetNumberIn(maintenance.getAssetNumbers()).collectList()
-                  .flatMap(assets -> {
-                     assets.forEach(asset -> asset.setStatus(AssetStatus.NORMAL));
-                     return assetRepository.saveAll(assets).collectList();
-                  }).map(result -> maintenance))
-            .flatMap(maintenance -> maintenanceHistoryHelper.createMaintenanceHistory(toMaintenanceHistoryHelperRequest(maintenance)))
+            }).doOnSuccess(maintenance -> updateAssets(maintenance.getAssetNumbers()))
+            .doOnSuccess(maintenance -> maintenanceHistoryHelper.createMaintenanceHistory(toMaintenanceHistoryHelperRequest(maintenance)).subscribe())
             .map(result -> Boolean.TRUE);
    }
 
@@ -67,6 +63,15 @@ public class RejectMaintenanceCommandImpl implements RejectMaintenanceCommand {
       }else {
          return Mono.defer(()->Mono.just(maintenance));
       }
+   }
+
+   private void updateAssets(List<String> assetNumbers){
+      assetRepository.findByAssetNumberIn(assetNumbers)
+            .map(asset -> {
+               asset.setStatus(AssetStatus.NORMAL);
+               return asset;
+            }).collectList()
+            .flatMap(assets -> assetRepository.saveAll(assets).collectList()).subscribe();
    }
 
    private MaintenanceHistoryHelperRequest toMaintenanceHistoryHelperRequest(Maintenance maintenance){

@@ -73,17 +73,16 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
                                        return createMaintenanceFromReminder(maintenanceReminder)
                                              .flatMap(maintenance -> itemRepository.findByItemCode(maintenanceReminder.getItemCode())
                                                    .doOnSuccess(item -> sendEmailHelper
-                                                         .sendEmail(toSendEmailHelperRequestUser(maintenanceReminder, maintenance.getMaintenanceNumber(),item.getItemName()))))
-                                             .flatMap(result->updateAssetStatus(assets));
+                                                         .sendEmail(toSendEmailHelperRequestUser(maintenanceReminder,maintenance.getMaintenanceNumber(),item.getItemName(),assets.get(0).getLocation()))))
+                                             .doOnSuccess(item -> updateAssetStatus(assets).subscribe());
                                     }else {
                                        return Mono.defer(()-> Mono.just(assets))
                                              .flatMap(assets1 -> itemRepository.findByItemCode(maintenanceReminder.getItemCode())
                                                          .doOnSuccess(item -> sendEmailHelper
-                                                               .sendEmail(toSendEmailHelperRequestUserMaintenanceNotCreated(maintenanceReminder,item.getItemName()))))
-                                             .map(result->assets);
+                                                               .sendEmail(toSendEmailHelperRequestUserMaintenanceNotCreated(maintenanceReminder,item.getItemName(),assets.get(0).getLocation()))));
                                     }
                                  }));
-            }).map(assets -> Boolean.TRUE);
+            }).map(item -> Boolean.TRUE);
    }
 
    private Mono<Schedule> updateSchedule(Schedule schedule, Date nextSchedule) {
@@ -108,8 +107,6 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
                   .tanggalLaporan(null)
                   .itemCode(maintenanceReminder.getItemCode())
                   .status(MaintenanceStatus.SCHEDULED)
-//                  .poNumber(maintenanceReminder.getAssetPoNumber())
-//                  .poIssuedDate(maintenanceReminder.getAssetPoIssuedDate())
                         .createdBy(StringConstants.SYSTEM)
                         .createdDate(new Date())
                         .lastModifiedBy(StringConstants.SYSTEM)
@@ -118,7 +115,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
    }
 
    private SendEmailHelperRequest toSendEmailHelperRequestUser(MaintenanceReminder maintenanceReminder, String maintenanceNumber,
-                                                               String itemName) {
+                                                               String itemName, String location) {
       String emailList = String.join(StringConstants.DELIMITER, maintenanceReminder.getEmailList());
       return SendEmailHelperRequest.builder()
             //TODO mailTemplateId
@@ -128,12 +125,12 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
             .toEmail(emailList)
             .identifierKey(StringConstants.MAINTENANCE_NUMBER)
             .identifierValue(maintenanceNumber)
-            .emailVariables(constructVariableForTemplate(maintenanceReminder,maintenanceNumber,itemName))
+            .emailVariables(constructVariableForTemplate(maintenanceReminder,maintenanceNumber,itemName,location))
             .build();
    }
 
    private Map<String, Object> constructVariableForTemplate(MaintenanceReminder maintenanceReminder, String maintenanceNumber,
-                                                            String itemName) {
+                                                            String itemName, String location) {
       String assetNumbers = String.join(commaDelimiter,maintenanceReminder.getAssetNumbers());
       Date newDate = new Date();
       LocalDate date = newDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -145,7 +142,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
       variables.put("itemName",itemName);
       variables.put("assetNumbers",assetNumbers);
       variables.put("assetQuantity",maintenanceReminder.getAssetNumbers().size());
-      variables.put("location",maintenanceReminder.getAssetLocation());
+      variables.put("location",location);
       variables.put("scheduledDate",dateStr);
       variables.put("nextScheduledDate",nextDateStr);
       variables.put("notes","-");
@@ -157,7 +154,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
       return assetRepository.saveAll(assets).collectList();
    }
 
-   private SendEmailHelperRequest toSendEmailHelperRequestUserMaintenanceNotCreated(MaintenanceReminder maintenanceReminder, String itemName) {
+   private SendEmailHelperRequest toSendEmailHelperRequestUserMaintenanceNotCreated(MaintenanceReminder maintenanceReminder, String itemName, String location) {
       String emailList = String.join(StringConstants.DELIMITER, maintenanceReminder.getEmailList());
       return SendEmailHelperRequest.builder()
             //TODO mailTemplateId
@@ -167,11 +164,11 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
             .toEmail(emailList)
             .identifierKey(StringConstants.MAINTENANCE_REMINDER_NUMBER)
             .identifierValue(maintenanceReminder.getMaintenanceReminderNumber())
-            .emailVariables(constructVariableForTemplateMaintenanceNotCreated(maintenanceReminder,itemName))
+            .emailVariables(constructVariableForTemplateMaintenanceNotCreated(maintenanceReminder,itemName, location))
             .build();
    }
 
-   private Map<String, Object> constructVariableForTemplateMaintenanceNotCreated(MaintenanceReminder maintenanceReminder, String itemName) {
+   private Map<String, Object> constructVariableForTemplateMaintenanceNotCreated(MaintenanceReminder maintenanceReminder, String itemName, String location) {
       String assetNumbers = String.join(", ",maintenanceReminder.getAssetNumbers());
       Date newDate = new Date();
       LocalDate date = newDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -183,7 +180,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
       variables.put("itemName",itemName);
       variables.put("assetNumbers",assetNumbers);
       variables.put("assetQuantity",maintenanceReminder.getAssetNumbers().size());
-      variables.put("location",maintenanceReminder.getAssetLocation());
+      variables.put("location",location);
       variables.put("scheduledDate",dateStr);
       variables.put("nextScheduledDate",nextDateStr);
       variables.put("notes","Maintenance tidak terbuat secara otomatis karena Asset tidak dalam status NORMAL");
