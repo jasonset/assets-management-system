@@ -28,6 +28,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
@@ -114,8 +115,12 @@ public class CreateMaintenanceRequestCommandImpl implements CreateMaintenanceReq
    }
 
    private Mono<List<Asset>> updateAssetStatus(List<Asset> assets){
-      assets.forEach(asset -> asset.setStatus(AssetStatus.PENDING_MAINTENANCE_REQUEST));
-      return assetRepository.saveAll(assets).collectList();
+      return Flux.fromIterable(assets)
+                  .map(asset -> {
+                     asset.setStatus(AssetStatus.PENDING_MAINTENANCE_REQUEST);
+                     return asset;
+                  }).collectList()
+                  .flatMap(assets1 -> assetRepository.saveAll(assets1).collectList());
    }
 
    //TODO email user
