@@ -75,16 +75,12 @@ public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceRe
                         }
                         return mono(()->assets);
                      }).flatMap(assets -> {
-                        if(!maintenanceReminder.getEnabled().equals(request.getEnabled())){
-                           if (BooleanUtils.isTrue(request.getEnabled())){
-                              return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode())
-                                    .doOnSuccess(maintenanceReminder1 -> saveNewSchedule(maintenanceReminder1,request));
-                           }else {
-                              return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode())
-                                    .doOnSuccess(this::disableSchedule);
-                           }
+                        if (BooleanUtils.isTrue(request.getEnabled())){
+                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode())
+                                 .doOnSuccess(maintenanceReminder1 -> saveNewSchedule(maintenanceReminder1,request));
                         }else {
-                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode());
+                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode())
+                                 .doOnSuccess(this::disableSchedule);
                         }}).flatMap(result->mono(()->Boolean.TRUE));
                      });
    }
