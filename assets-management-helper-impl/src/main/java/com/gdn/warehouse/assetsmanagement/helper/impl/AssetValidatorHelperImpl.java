@@ -56,13 +56,12 @@ public class AssetValidatorHelperImpl implements AssetValidatorHelper {
    private Mono<List<Asset>> validateAssetNameAndLocation(List<Asset> assetList, List<String> assetNumberRequestList){
       List<String> assetNumberList = assetList.stream().map(Asset::getAssetNumber).collect(Collectors.toList());
       Collection<String> validateAssetExist = CollectionUtils.subtract(assetNumberRequestList,assetNumberList);
-      boolean allItemAndLocationSame = assetList.stream().allMatch(asset -> assetList.get(0).getItemCode().equals(asset.getItemCode())&&
-            assetList.get(0).getLocation().equals(asset.getLocation()));
-
       if(CollectionUtils.isNotEmpty(validateAssetExist)){
          return Mono.defer(()->Mono.error(new CommandErrorException("Asset: "+validateAssetExist+" does not exist!",HttpStatus.BAD_REQUEST)));
       }
 
+      boolean allItemAndLocationSame = assetList.stream().allMatch(asset -> assetList.get(0).getItemCode().equals(asset.getItemCode())&&
+            assetList.get(0).getLocation().equals(asset.getLocation()));
       if(allItemAndLocationSame){
          return Mono.defer(()->Mono.just(assetList));
       }else {
