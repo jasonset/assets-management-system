@@ -3,6 +3,7 @@ package com.gdn.warehouse.assetsmanagement.command.impl;
 import com.blibli.oss.backend.json.helper.JsonHelper;
 import com.gdn.warehouse.assetsmanagement.command.CreateMaintenanceReminderCommand;
 import com.gdn.warehouse.assetsmanagement.command.model.CreateMaintenanceReminderCommandRequest;
+import com.gdn.warehouse.assetsmanagement.command.model.exception.CommandErrorException;
 import com.gdn.warehouse.assetsmanagement.entity.Asset;
 import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.enums.DocumentType;
@@ -19,6 +20,7 @@ import com.gdn.warehouse.assetsmanagement.streaming.model.MaintenanceReminderEve
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -59,17 +61,22 @@ public class CreateMaintenanceReminderCommandImpl implements CreateMaintenanceRe
 
    @Override
    public Mono<String> execute(CreateMaintenanceReminderCommandRequest request) {
+      Date scheduledDate = new Date(request.getScheduledDate());
+      Calendar now = Calendar.getInstance();
+      if(scheduledDate.before(now.getTime())){
+         return Mono.defer(()->Mono.error(new CommandErrorException("Scheduled Date can't be before today's date!", HttpStatus.BAD_REQUEST)));
+      }
       List<String> assetNumbers = request.getAssetNumbers().stream().map(String::trim).distinct().collect(Collectors.toList());
       return assetValidatorHelper.validateAssetForMaintenanceReminder(assetNumbers)
             .flatMap(assets -> itemRepository.findByItemCode(assets.get(0).getItemCode())
-                  .flatMap(item -> createMaintenanceReminder(request,item.getItemCode(),assets.get(0),assets,assetNumbers)))
+                  .flatMap(item -> createMaintenanceReminder(request,item.getItemCode(),assets.get(0),assets,assetNumbers,now)))
             .doOnSuccess(this::assignScheduleToSchedulerPlatform)
             .map(MaintenanceReminder::getMaintenanceReminderNumber);
    }
 
    private Mono<MaintenanceReminder> createMaintenanceReminder(CreateMaintenanceReminderCommandRequest request, String itemCode,
-                                                               Asset asset, List<Asset> assetList, List<String> assetNumbers){
-      Calendar now = Calendar.getInstance();
+                                                               Asset asset, List<Asset> assetList, List<String> assetNumbers,
+                                                               Calendar now){
       now.setTime(new Date(request.getScheduledDate()));
       now.set(Calendar.HOUR_OF_DAY,8);
       now.set(Calendar.MINUTE,0);
