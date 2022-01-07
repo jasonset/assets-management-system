@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,6 +57,11 @@ public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceRe
    public Mono<Boolean> execute(UpdateMaintenanceReminderCommandRequest request) {
       return maintenanceReminderRepository.findByMaintenanceReminderNumber(request.getMaintenanceReminderNumber())
             .flatMap(maintenanceReminder -> {
+               Date scheduledDate = new Date(request.getScheduledDate());
+               Calendar now = Calendar.getInstance();
+               if(scheduledDate.before(now.getTime())){
+                  return Mono.defer(()->Mono.error(new CommandErrorException("Scheduled Date can't be before today's date!",HttpStatus.BAD_REQUEST)));
+               }
                List<String> assetNumbersRequest = request.getAssetNumbers().stream().map(String::trim).distinct().collect(Collectors.toList());
                List<String> emailListRequest = request.getEmailList().stream().map(String::trim).distinct().collect(Collectors.toList());
                return assetValidatorHelper.validateAssetFromRequest(assetNumbersRequest)
@@ -75,20 +81,26 @@ public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceRe
                         }
                         return mono(()->assets);
                      }).flatMap(assets -> {
+                        now.setTime(new Date(request.getScheduledDate()));
+                        now.set(Calendar.HOUR_OF_DAY,8);
+                        now.set(Calendar.MINUTE,0);
+                        now.set(Calendar.SECOND,0);
+                        Date newDate = now.getTime();
                         if (BooleanUtils.isTrue(request.getEnabled())){
-                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode())
-                                 .doOnSuccess(maintenanceReminder1 -> saveNewSchedule(maintenanceReminder1,request));
+                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode(),newDate)
+                                 .doOnSuccess(maintenanceReminder1 -> saveNewSchedule(maintenanceReminder1,request,newDate));
                         }else {
-                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode())
+                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode(),newDate)
                                  .doOnSuccess(this::disableSchedule);
                         }}).flatMap(result->mono(()->Boolean.TRUE));
                      });
    }
 
-   private void saveNewSchedule(MaintenanceReminder maintenanceReminder,UpdateMaintenanceReminderCommandRequest request){
+   private void saveNewSchedule(MaintenanceReminder maintenanceReminder,UpdateMaintenanceReminderCommandRequest request,
+                                Date scheduledDate){
       scheduleHelper.saveSchedule(CreateScheduleHelperRequest.builder()
                   .identifier(maintenanceReminder.getMaintenanceReminderNumber())
-                  .nextSchedule(new Date(request.getScheduledDate()))
+                  .nextSchedule(scheduledDate)
                   .topic(AssetsManagementTopics.SCHEDULED_MAINTENANCE_REMINDER)
                   .payload(jsonHelper.toJson(MaintenanceReminderEvent.builder()
                         .maintenanceReminderNumber(maintenanceReminder.getMaintenanceReminderNumber()).build()))
@@ -104,9 +116,9 @@ public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceRe
    }
 
    private Mono<MaintenanceReminder> updateMaintenanceReminder(UpdateMaintenanceReminderCommandRequest request, MaintenanceReminder maintenanceReminder, List<String> assetNumbersRequest,
-                                                            List<String> emailListRequest, String itemCode) {
+                                                            List<String> emailListRequest, String itemCode, Date scheduledDate) {
       maintenanceReminder.setEnabled(request.getEnabled());
-      maintenanceReminder.setScheduledDate(new Date(request.getScheduledDate()));
+      maintenanceReminder.setScheduledDate(scheduledDate);
       maintenanceReminder.setInterval(request.getInterval());
       maintenanceReminder.setAssetNumbers(assetNumbersRequest);
       maintenanceReminder.setEmailList(emailListRequest);

@@ -13,18 +13,25 @@ import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.GenerateAssetNumberRequest;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.WarehouseRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
+import java.time.Duration;
+
+import static java.lang.Thread.sleep;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 public class CreateAssetCommandImplTest {
    @InjectMocks
    private CreateAssetCommandImpl command;
@@ -100,4 +107,30 @@ public class CreateAssetCommandImplTest {
       command.execute(commandRequest).block();
       verify(warehouseRepository).findByWarehouseName(anyString());
    }
+
+//   @Test
+//   public void test_flux() throws InterruptedException {
+//      System.out.println("Starts");
+//
+//      //flux emits one element per second
+//      Flux<Character> flux = Flux.just('a', 'b', 'c', 'd')
+//            .delayElements(Duration.ofSeconds(1));
+//      //Observer 1 - takes 500ms to process
+//      flux
+//            .map(Character::toUpperCase)
+//            .subscribe(i -> {
+//               try {
+//                  sleep(500);
+//               } catch (InterruptedException e) {
+//                  e.printStackTrace();
+//               }
+//               log.info("Observer-1 : " + i);
+//            });
+//      //Observer 2 - process immediately
+//      flux.subscribe(i -> log.info("Observer-2 : " + i));
+//
+//      sleep(10000);
+//      System.out.println("Ends");
+//   }
+
 }

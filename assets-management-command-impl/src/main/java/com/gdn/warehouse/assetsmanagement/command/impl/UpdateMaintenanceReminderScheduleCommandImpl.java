@@ -54,6 +54,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
 
    @Override
    public Mono<Boolean> execute(UpdateMaintenanceReminderScheduleCommandRequest request) {
+      log.info("Listening Reminder "+request.getMaintenanceReminderNumber());
       return Mono.zip(maintenanceReminderRepository.findByMaintenanceReminderNumber(request.getMaintenanceReminderNumber()),
                   scheduleRepository.findByIdentifier(request.getMaintenanceReminderNumber()))
             .flatMap(tuple -> {

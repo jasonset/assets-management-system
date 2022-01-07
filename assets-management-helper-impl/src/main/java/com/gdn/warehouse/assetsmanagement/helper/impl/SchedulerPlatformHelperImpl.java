@@ -24,6 +24,7 @@ public class SchedulerPlatformHelperImpl implements SchedulerPlatformHelper {
 
    @Override
    public void sendToSchedulerPlatform(Schedule schedule) {
+      log.info("Sending Schedule "+schedule.getIdentifier());
       DelayedJobRequest delayedJobRequest = constructDelayedJobRequest(schedule);
       schedulerPlatformRepository.send(delayedJobRequest).subscribe();
    }

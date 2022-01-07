@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -69,11 +70,13 @@ public class UpdateMaintenanceReminderCommandImplTest {
             .enabled(Boolean.TRUE)
             .assetNumbers(Arrays.asList("ASSET-NUMBER3","ASSET-NUMBER1"))
             .emailList(Arrays.asList("abc@gdn-commerce.com","def@gdn-commerce.com"))
-            .interval(1).scheduledDate(1L).username("username").build();
+            .interval(1).scheduledDate(Long.MAX_VALUE).username("username").build();
+      Calendar now = Calendar.getInstance();
+      now.add(Calendar.DATE,3);
       maintenanceReminder = MaintenanceReminder.builder().assetNumbers(Arrays.asList("ASSET-NUMBER1","ASSET-NUMBER2"))
             .emailList(Arrays.asList("abc@gdn-commerce.com"))
             .maintenanceReminderNumber("MR-NUMBER")
-            .scheduledDate(new Date())
+            .scheduledDate(now.getTime())
             .enabled(Boolean.FALSE)
             .previousExecutionTime(null)
             .interval(2).build();
@@ -134,6 +137,8 @@ public class UpdateMaintenanceReminderCommandImplTest {
       when(assetValidatorHelper.validateAssetFromRequest(anyList())).thenReturn(Mono.just(Arrays.asList(asset,asset3)));
       when(assetRepository.findByAssetNumberIn(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
       when(assetRepository.saveAll(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
+      doNothing().when(schedulerPlatformHelper).sendToSchedulerPlatform(any(Schedule.class));
+      when(scheduleHelper.saveSchedule(any(CreateScheduleHelperRequest.class))).thenReturn(Mono.just(schedule));
       command.execute(commandRequest).block();
       verify(maintenanceReminderRepository).findByMaintenanceReminderNumber(anyString());
       verify(maintenanceReminderRepository).save(any(MaintenanceReminder.class));
@@ -167,9 +172,18 @@ public class UpdateMaintenanceReminderCommandImplTest {
       when(maintenanceReminderRepository.findByMaintenanceReminderNumber(anyString())).thenReturn(Mono.just(maintenanceReminder));
       when(maintenanceReminderRepository.save(any(MaintenanceReminder.class))).thenReturn(Mono.just(maintenanceReminder));
       when(assetValidatorHelper.validateAssetFromRequest(anyList())).thenReturn(Mono.just(Arrays.asList(asset,asset3)));
+      when(scheduleHelper.saveSchedule(any(CreateScheduleHelperRequest.class))).thenReturn(Mono.just(schedule));
+      doNothing().when(schedulerPlatformHelper).sendToSchedulerPlatform(any(Schedule.class));
       command.execute(commandRequest).block();
       verify(maintenanceReminderRepository).findByMaintenanceReminderNumber(anyString());
       verify(maintenanceReminderRepository).save(any(MaintenanceReminder.class));
       verify(assetValidatorHelper).validateAssetFromRequest(anyList());
+   }
+
+   @Test(expected = CommandErrorException.class)
+   public void execute_fail_scheduledDate_before_now(){
+      commandRequest.setScheduledDate(1L);
+      when(maintenanceReminderRepository.findByMaintenanceReminderNumber(anyString())).thenReturn(Mono.just(maintenanceReminder));
+      command.execute(commandRequest).block();
    }
 }

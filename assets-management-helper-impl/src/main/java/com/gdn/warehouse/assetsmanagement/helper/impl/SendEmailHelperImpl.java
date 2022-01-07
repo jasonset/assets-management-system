@@ -17,6 +17,7 @@ public class SendEmailHelperImpl implements SendEmailHelper {
 
    @Override
    public void sendEmail(SendEmailHelperRequest request) {
+      log.info("Sending Email: "+request.getMailTemplateId());
       MessageEmailRequest messageEmailRequest = new MessageEmailRequest();
       messageEmailRequest.setMessageId(request.getMailTemplateId());
       messageEmailRequest.setMessageSubject(request.getMailSubject());
