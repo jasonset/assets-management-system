@@ -17,4 +17,5 @@ public class CreateTransferAssetWebRequest {
    private String destination;
    private String notes;
    private TransferAssetType transferAssetType;
+   private Long duration;
 }

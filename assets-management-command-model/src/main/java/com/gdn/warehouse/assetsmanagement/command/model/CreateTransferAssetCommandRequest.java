@@ -18,4 +18,5 @@ public class CreateTransferAssetCommandRequest {
    private String notes;
    private String username;
    private TransferAssetType transferAssetType;
+   private Long duration;
 }
