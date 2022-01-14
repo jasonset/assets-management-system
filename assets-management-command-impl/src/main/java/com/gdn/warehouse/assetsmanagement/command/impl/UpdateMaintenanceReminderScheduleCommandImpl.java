@@ -23,6 +23,7 @@ import com.gdn.warehouse.assetsmanagement.repository.MaintenanceRepository;
 import com.gdn.warehouse.assetsmanagement.repository.ScheduleRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -30,6 +31,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -69,8 +71,13 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
                         return maintenanceReminderRepository.save(tuple.getT1());
                      }).flatMap(maintenanceReminder -> assetRepository.findByAssetNumberIn(maintenanceReminder.getAssetNumbers()).collectList()
                                  .flatMap(assets -> {
-                                    boolean allNormal = assets.stream().allMatch(asset -> AssetStatus.NORMAL.equals(asset.getStatus()));
-                                    if(allNormal){
+                                    List<Asset> abnormalAssets = new ArrayList<>();
+                                    assets.forEach(asset -> {
+                                       if(!AssetStatus.NORMAL.equals(asset.getStatus())){
+                                          abnormalAssets.add(asset);
+                                       }
+                                    });
+                                    if(CollectionUtils.isEmpty(abnormalAssets)){
                                        return createMaintenanceFromReminder(maintenanceReminder)
                                              .flatMap(maintenance -> itemRepository.findByItemCode(maintenanceReminder.getItemCode())
                                                    .doOnSuccess(item -> sendEmailHelper
@@ -80,7 +87,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
                                        return Mono.defer(()-> Mono.just(assets))
                                              .flatMap(assets1 -> itemRepository.findByItemCode(maintenanceReminder.getItemCode())
                                                          .doOnSuccess(item -> sendEmailHelper
-                                                               .sendEmail(toSendEmailHelperRequestUserMaintenanceNotCreated(maintenanceReminder,item.getItemName(),assets.get(0).getLocation()))));
+                                                               .sendEmail(toSendEmailHelperRequestUserMaintenanceNotCreated(maintenanceReminder,item.getItemName(),assets.get(0).getLocation(),abnormalAssets))));
                                     }
                                  }));
             }).map(item -> Boolean.TRUE);
@@ -155,8 +162,10 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
       return assetRepository.saveAll(assets).collectList();
    }
 
-   private SendEmailHelperRequest toSendEmailHelperRequestUserMaintenanceNotCreated(MaintenanceReminder maintenanceReminder, String itemName, String location) {
+   private SendEmailHelperRequest toSendEmailHelperRequestUserMaintenanceNotCreated(MaintenanceReminder maintenanceReminder, String itemName,
+                                                                                    String location, List<Asset> abnormalAssets) {
       String emailList = String.join(StringConstants.DELIMITER, maintenanceReminder.getEmailList());
+
       return SendEmailHelperRequest.builder()
             //TODO mailTemplateId
             .mailTemplateId("EMAIL_ASSETS_MANAGEMENT_MAINTENANCE_REMINDER")
@@ -165,12 +174,21 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
             .toEmail(emailList)
             .identifierKey(StringConstants.MAINTENANCE_REMINDER_NUMBER)
             .identifierValue(maintenanceReminder.getMaintenanceReminderNumber())
-            .emailVariables(constructVariableForTemplateMaintenanceNotCreated(maintenanceReminder,itemName, location))
+            .emailVariables(constructVariableForTemplateMaintenanceNotCreated(maintenanceReminder,itemName, location,abnormalAssets))
             .build();
    }
 
-   private Map<String, Object> constructVariableForTemplateMaintenanceNotCreated(MaintenanceReminder maintenanceReminder, String itemName, String location) {
+   private Map<String, Object> constructVariableForTemplateMaintenanceNotCreated(MaintenanceReminder maintenanceReminder, String itemName,
+                                                                                 String location, List<Asset> abnormalAssets) {
       String assetNumbers = String.join(", ",maintenanceReminder.getAssetNumbers());
+      List<String> abnormalAssetNumbers = new ArrayList<>();
+      List<String> abnormalAssetStatuses = new ArrayList<>();
+      abnormalAssets.forEach(asset -> {
+         abnormalAssetNumbers.add(asset.getAssetNumber());
+         abnormalAssetStatuses.add(asset.getStatus().name());
+      });
+      String abnormalAssetNumber = String.join(StringConstants.DELIMITER, abnormalAssetNumbers);
+      String abnormalAssetStatus = String.join(StringConstants.DELIMITER, abnormalAssetStatuses);
       Date newDate = new Date();
       LocalDate date = newDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
       LocalDate nextDate = maintenanceReminder.getScheduledDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -184,7 +202,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
       variables.put("location",location);
       variables.put("scheduledDate",dateStr);
       variables.put("nextScheduledDate",nextDateStr);
-      variables.put("notes","Maintenance tidak terbuat secara otomatis karena Asset tidak dalam status NORMAL");
+      variables.put("notes","Maintenance tidak terbuat secara otomatis karena Asset "+abnormalAssetNumber+ " dalam status "+abnormalAssetStatus);
       return variables;
    }
 }

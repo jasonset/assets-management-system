@@ -1,5 +1,6 @@
-package com.gdn.warehouse.assetsmanagement.command.model;
+package com.gdn.warehouse.assetsmanagement.streaming.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OnDeliveryTransferAssetCommandRequest {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class TransferAssetEvent {
    private String transferAssetNumber;
-   private Long deliveryDate;
-   private Integer deliveryFee;
-   private String username;
 }

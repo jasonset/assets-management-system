@@ -7,11 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class OnDeliveryTransferAssetCommandRequest {
+@NoArgsConstructor
+public class SendTransferAssetReminderCommandRequest {
    private String transferAssetNumber;
-   private Long deliveryDate;
-   private Integer deliveryFee;
-   private String username;
 }

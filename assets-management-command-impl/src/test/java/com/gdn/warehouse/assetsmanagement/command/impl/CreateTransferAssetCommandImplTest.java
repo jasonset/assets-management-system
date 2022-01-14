@@ -77,7 +77,7 @@ public class CreateTransferAssetCommandImplTest {
             .destination("DESTINATION")
             .notes("NOTES")
             .username("username")
-            .transferAssetType(TransferAssetType.NORMAL)
+            .transferAssetType(TransferAssetType.MOVE)
             .build();
       asset = Asset.builder().status(AssetStatus.NORMAL).assetNumber("ASSET-NUMBER").location("LOCATION").itemCode("ITEM-CODE").build();
       transferAsset = TransferAsset.builder().transferAssetNumber("TA-CODE").assetNumbers(Arrays.asList("ASSET-NUMBER")).build();

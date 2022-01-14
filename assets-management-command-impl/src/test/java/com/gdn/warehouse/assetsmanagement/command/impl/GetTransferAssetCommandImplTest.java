@@ -59,7 +59,7 @@ public class GetTransferAssetCommandImplTest {
             .assetNumberFilter("ASSET-NUMBER")
             .statusFilter(TransferAssetStatus.PENDING.name())
             .referenceNumberFilter("REFERENCE")
-            .transferAssetTypeFilter(TransferAssetType.NORMAL.name())
+            .transferAssetTypeFilter(TransferAssetType.MOVE.name())
             .sortBy(Arrays.asList(sortBy))
             .limit(1).page(10).build();
       commandRequest2 = GetTransferAssetCommandRequest.builder().limit(1).page(10).build();
@@ -71,7 +71,7 @@ public class GetTransferAssetCommandImplTest {
             .itemCode("ITEM-CODE")
             .status(TransferAssetStatus.PENDING)
             .referenceNumber("REFERENCE")
-            .transferAssetType(TransferAssetType.NORMAL)
+            .transferAssetType(TransferAssetType.MOVE)
             .build();
       item = Item.builder().itemName("NAME").itemCode("CODE").build();
    }

@@ -49,7 +49,7 @@ public class TransferAssetCustomRepositoryImplTest {
             .originFilter("ORIGIN")
             .destinationFilter("DESTINATION")
             .statusFilter(TransferAssetStatus.ON_DELIVERY.name())
-            .transferAssetTypeFilter(TransferAssetType.NORMAL.name())
+            .transferAssetTypeFilter(TransferAssetType.MOVE.name())
             .referenceNumberFilter("REFERENCE").build();
       requestNoFilter = GetTransferAssetCriteriaRequest.builder().build();
       sort = Sort.by(Sort.DEFAULT_DIRECTION,"test");

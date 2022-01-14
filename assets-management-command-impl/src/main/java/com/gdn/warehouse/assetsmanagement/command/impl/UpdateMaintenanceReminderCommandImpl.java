@@ -7,6 +7,7 @@ import com.gdn.warehouse.assetsmanagement.command.model.exception.CommandErrorEx
 import com.gdn.warehouse.assetsmanagement.entity.Asset;
 import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.helper.AssetValidatorHelper;
+import com.gdn.warehouse.assetsmanagement.helper.DateValidatorHelper;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.CreateScheduleHelperRequest;
@@ -53,47 +54,45 @@ public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceRe
    @Autowired
    private AssetRepository assetRepository;
 
+   @Autowired
+   private DateValidatorHelper dateValidatorHelper;
+
    @Override
    public Mono<Boolean> execute(UpdateMaintenanceReminderCommandRequest request) {
-      return maintenanceReminderRepository.findByMaintenanceReminderNumber(request.getMaintenanceReminderNumber())
-            .flatMap(maintenanceReminder -> {
-               Date scheduledDate = new Date(request.getScheduledDate());
-               Calendar now = Calendar.getInstance();
-               if(scheduledDate.before(now.getTime())){
-                  return Mono.defer(()->Mono.error(new CommandErrorException("Scheduled Date can't be before today's date!",HttpStatus.BAD_REQUEST)));
-               }
-               List<String> assetNumbersRequest = request.getAssetNumbers().stream().map(String::trim).distinct().collect(Collectors.toList());
-               List<String> emailListRequest = request.getEmailList().stream().map(String::trim).distinct().collect(Collectors.toList());
-               return assetValidatorHelper.validateAssetFromRequest(assetNumbersRequest)
-                     .flatMap(assets -> {
-                        List<String> newAssets = new ArrayList<>(assetNumbersRequest);
-                        newAssets.removeAll(maintenanceReminder.getAssetNumbers());
-                        List<String> oldAssets = new ArrayList<>(maintenanceReminder.getAssetNumbers());
-                        oldAssets.removeAll(assetNumbersRequest);
-                        if(CollectionUtils.isNotEmpty(newAssets)){
-                           return assetRepository.findByAssetNumberIn(newAssets)
-                                 .flatMap(this::validateReminder).flatMap(this::turnOnReminder).collectList()
-                                 .flatMap(assets1 -> assetRepository.saveAll(assets1).collectList())
-                                 .flatMap(assets1 -> assetRepository.findByAssetNumberIn(oldAssets)
-                                       .flatMap(this::turnOffReminder).collectList()
-                                       .flatMap(assets2 -> assetRepository.saveAll(assets2).collectList())
-                                       .map(assets2 -> assets1));
-                        }
-                        return mono(()->assets);
-                     }).flatMap(assets -> {
-                        now.setTime(new Date(request.getScheduledDate()));
-                        now.set(Calendar.HOUR_OF_DAY,8);
-                        now.set(Calendar.MINUTE,0);
-                        now.set(Calendar.SECOND,0);
-                        Date newDate = now.getTime();
-                        if (BooleanUtils.isTrue(request.getEnabled())){
-                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode(),newDate)
-                                 .doOnSuccess(maintenanceReminder1 -> saveNewSchedule(maintenanceReminder1,request,newDate));
-                        }else {
-                           return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode(),newDate)
-                                 .doOnSuccess(this::disableSchedule);
-                        }}).flatMap(result->mono(()->Boolean.TRUE));
-                     });
+      return dateValidatorHelper.validateScheduledDate(request.getScheduledDate())
+            .flatMap(calendar -> maintenanceReminderRepository.findByMaintenanceReminderNumber(request.getMaintenanceReminderNumber())
+                  .flatMap(maintenanceReminder -> {
+                     List<String> assetNumbersRequest = request.getAssetNumbers().stream().map(String::trim).distinct().collect(Collectors.toList());
+                     List<String> emailListRequest = request.getEmailList().stream().map(String::trim).distinct().collect(Collectors.toList());
+                     return assetValidatorHelper.validateAssetFromRequest(assetNumbersRequest)
+                           .flatMap(assets -> {
+                              List<String> newAssets = new ArrayList<>(assetNumbersRequest);
+                              newAssets.removeAll(maintenanceReminder.getAssetNumbers());
+                              List<String> oldAssets = new ArrayList<>(maintenanceReminder.getAssetNumbers());
+                              oldAssets.removeAll(assetNumbersRequest);
+                              if(CollectionUtils.isNotEmpty(newAssets)){
+                                 return assetRepository.findByAssetNumberIn(newAssets)
+                                       .flatMap(this::validateReminder).flatMap(this::turnOnReminder).collectList()
+                                       .flatMap(assets1 -> assetRepository.saveAll(assets1).collectList())
+                                       .flatMap(assets1 -> assetRepository.findByAssetNumberIn(oldAssets)
+                                             .flatMap(this::turnOffReminder).collectList()
+                                             .flatMap(assets2 -> assetRepository.saveAll(assets2).collectList())
+                                             .map(assets2 -> assets1));
+                              }
+                              return mono(()->assets);
+                           }).flatMap(assets -> {
+                              calendar.set(Calendar.HOUR_OF_DAY,8);
+                              calendar.set(Calendar.MINUTE,0);
+                              calendar.set(Calendar.SECOND,0);
+                              Date newDate = calendar.getTime();
+                              if (BooleanUtils.isTrue(request.getEnabled())){
+                                 return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode(),newDate)
+                                       .doOnSuccess(maintenanceReminder1 -> saveNewSchedule(maintenanceReminder1,request,newDate));
+                              }else {
+                                 return updateMaintenanceReminder(request, maintenanceReminder, assetNumbersRequest,emailListRequest,assets.get(0).getItemCode(),newDate)
+                                       .doOnSuccess(this::disableSchedule);
+                              }}).flatMap(result->mono(()->Boolean.TRUE));
+                  }));
    }
 
    private void saveNewSchedule(MaintenanceReminder maintenanceReminder,UpdateMaintenanceReminderCommandRequest request,

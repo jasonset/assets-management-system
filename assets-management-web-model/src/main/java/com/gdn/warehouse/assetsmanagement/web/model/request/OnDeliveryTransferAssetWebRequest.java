@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class OnDeliveryTransferAssetWebRequest {
    private String transferAssetNumber;
    private Long deliveryDate;
+   private Integer deliveryFee;
 }

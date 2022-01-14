@@ -35,4 +35,6 @@ public class TransferAsset extends BaseEntity {
    private String originWarehouseManagerEmail;
    private String destinationWarehouseManagerEmail;
    private TransferAssetType transferAssetType;
+   private Date duration;
+   private Integer deliveryFee;
 }

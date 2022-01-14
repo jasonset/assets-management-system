@@ -36,7 +36,7 @@ public class TransferAssetHistoryHelperImplTest {
       request = TransferAssetHistoryHelperRequest.builder()
             .transferAssetNumber("NUMBER")
             .transferAssetStatus(TransferAssetStatus.APPROVED)
-            .transferAssetType(TransferAssetType.NORMAL)
+            .transferAssetType(TransferAssetType.MOVE)
             .updatedDate(new Date())
             .updatedBy("NAME").build();
 

@@ -58,7 +58,7 @@ public class AssetController {
 
    @PostMapping(value = "/_create", produces = MediaType.APPLICATION_JSON_VALUE)
    public Mono<Response<String>> createAsset(MandatoryParameter mandatoryParameter,
-                                              @RequestBody CreateAssetWebRequest request) {
+                                             @RequestBody CreateAssetWebRequest request) {
       return commandExecutor.execute(CreateAssetCommand.class,toCreateAssetCommandRequest(request, mandatoryParameter.getUsername()))
             .map(ResponseHelper::ok)
             .subscribeOn(schedulerHelper.of(AssetsManagementSchedulerProperties.SCHEDULER_NAME));

@@ -30,7 +30,7 @@ public class GetTransferAssetHistoryCommandImplTest {
    public void setUp() throws Exception {
       MockitoAnnotations.initMocks(this);
 
-      transferAssetHistory = TransferAssetHistory.builder().transferAssetType(TransferAssetType.NORMAL)
+      transferAssetHistory = TransferAssetHistory.builder().transferAssetType(TransferAssetType.MOVE)
             .transferAssetStatus(TransferAssetStatus.APPROVED).build();
       commandRequest = GetTransferAssetHistoryCommandRequest.builder()
             .transferAssetNumber("TA-NUMBER").build();

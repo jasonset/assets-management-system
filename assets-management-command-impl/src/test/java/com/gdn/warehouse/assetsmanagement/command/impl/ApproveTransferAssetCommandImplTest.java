@@ -85,7 +85,7 @@ public class ApproveTransferAssetCommandImplTest {
 
    @Test
    public void execute_true_TA_normal() {
-      transferAsset.setTransferAssetType(TransferAssetType.NORMAL);
+      transferAsset.setTransferAssetType(TransferAssetType.MOVE);
       when(transferAssetRepository.findByTransferAssetNumber(anyString())).thenReturn(Mono.just(transferAsset));
       when(transferAssetRepository.save(any(TransferAsset.class))).thenReturn(Mono.just(transferAsset));
       when(assetRepository.findByAssetNumberIn(anyList())).thenReturn(Flux.just(asset));

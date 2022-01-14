@@ -113,7 +113,7 @@ public class TransferAssetControllerTest {
             .destination("DESTINATION")
             .status(TransferAssetStatus.PENDING)
             .referenceNumber("REFERENCE")
-            .transferAssetType(TransferAssetType.NORMAL)
+            .transferAssetType(TransferAssetType.MOVE)
             .notes("NOTES").build();
       getTransferAssetWebResponse = GetTransferAssetWebResponse.builder().build();
       paging = Paging.builder().build();

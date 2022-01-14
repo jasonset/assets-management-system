@@ -50,7 +50,7 @@ public class OnDeliveryTransferAssetCommandImplTest {
       commandRequest = OnDeliveryTransferAssetCommandRequest.builder().transferAssetNumber("TA-NUMBER")
             .deliveryDate(1L).username("name").build();
       transferAsset = TransferAsset.builder().transferAssetNumber("TA-NUMBER")
-            .transferAssetType(TransferAssetType.NORMAL).status(TransferAssetStatus.APPROVED)
+            .transferAssetType(TransferAssetType.MOVE).status(TransferAssetStatus.APPROVED)
             .assetNumbers(Arrays.asList("ASSET-NUMBER")).build();
       asset = Asset.builder().assetNumber("ASSET-NUMBER").build();
    }

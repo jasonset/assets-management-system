@@ -84,7 +84,8 @@ public class ApproveMaintenanceRequestCommandImpl implements ApproveMaintenanceR
                asset.setStatus(newStatus);
                return asset;
             }).collectList()
-            .flatMap(assets -> assetRepository.saveAll(assets).collectList()).subscribe();
+            .flatMap(assets -> assetRepository.saveAll(assets).collectList())
+            .subscribe();
    }
 
 
