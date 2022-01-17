@@ -76,10 +76,11 @@ public class CreateMaintenanceRequestCommandImpl implements CreateMaintenanceReq
       return assetValidatorHelper.validateAssetFromRequest(assetNumbers)
             .flatMap(assets -> Mono.zip(createMaintenance(request,assets.get(0),assets,assetNumbers),
                   systemParamRepository.findByKey(StringConstants.BASE_PATH_UI)))
-            .doOnSuccess(tuple2 -> sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManager(tuple2)))
-            .doOnSuccess(tuple2 -> sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(tuple2)))
-            .doOnSuccess(tuple2 -> sendEmailHelper.sendEmail(toSendEmailHelperRequestRequester(tuple2,request.getRequesterEmail())))
-            .map(tuple2 -> tuple2.getT1().getLeft().getMaintenanceNumber());
+            .doOnSuccess(tuple2 -> {
+               sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManager(tuple2));
+               sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(tuple2));
+               sendEmailHelper.sendEmail(toSendEmailHelperRequestRequester(tuple2,request.getRequesterEmail()));
+            }).map(tuple2 -> tuple2.getT1().getLeft().getMaintenanceNumber());
    }
 
    private Mono<Pair<Maintenance, Item>> createMaintenance(CreateMaintenanceRequestCommandRequest request, Asset asset,
