@@ -75,8 +75,10 @@ public class CreateTransferAssetCommandImpl implements CreateTransferAssetComman
             .flatMap(assets ->  Mono.zip(createTransferAsset(request,assets.get(0).getLocation(),assets,assetNumbers),
                   systemParamRepository.findByKey(StringConstants.BASE_PATH_UI),
                   itemRepository.findByItemCode(assets.get(0).getItemCode())))
-            .doOnSuccess(tuple3 -> sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(tuple3)))
-            .doOnSuccess(tuple3 -> sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManagerOrigin(tuple3)))
+            .doOnSuccess(tuple3 -> {
+               sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(tuple3));
+               sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManagerOrigin(tuple3));
+            })
             .map(tuple3 -> tuple3.getT1().getTransferAssetNumber())
             .onErrorMap(error -> new CommandErrorException(error.getMessage(), HttpStatus.BAD_REQUEST));
       //TODO kirim email ke warehouse manager dan user
