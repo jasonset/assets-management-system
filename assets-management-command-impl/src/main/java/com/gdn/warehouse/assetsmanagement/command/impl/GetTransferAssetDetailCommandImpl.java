@@ -44,6 +44,7 @@ public class GetTransferAssetDetailCommandImpl implements GetTransferAssetDetail
                   .referenceNumber(transferAsset.getReferenceNumber())
                   .deliveryDate(transferAsset.getDeliveryDate())
                   .transferAssetType(transferAsset.getTransferAssetType().name())
-                  .duration(transferAsset.getDuration()).build());
+                  .duration(transferAsset.getDuration())
+                  .deliveryFee(transferAsset.getDeliveryFee()).build());
    }
 }

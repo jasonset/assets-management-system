@@ -9,6 +9,7 @@ import com.gdn.warehouse.assetsmanagement.entity.Schedule;
 import com.gdn.warehouse.assetsmanagement.enums.AssetStatus;
 import com.gdn.warehouse.assetsmanagement.enums.DocumentType;
 import com.gdn.warehouse.assetsmanagement.enums.MaintenanceStatus;
+import com.gdn.warehouse.assetsmanagement.helper.DateHelper;
 import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
@@ -28,9 +29,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,7 +50,7 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
    private SendEmailHelper sendEmailHelper;
    private AssetRepository assetRepository;
    private ItemRepository itemRepository;
-
+   private DateHelper dateHelper;
 
    @Override
    public Mono<Boolean> execute(UpdateMaintenanceReminderScheduleCommandRequest request) {
@@ -141,10 +139,8 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
                                                             String itemName, String location) {
       String assetNumbers = String.join(commaDelimiter,maintenanceReminder.getAssetNumbers());
       Date newDate = new Date();
-      LocalDate date = newDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      LocalDate nextDate = maintenanceReminder.getScheduledDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      String dateStr = date.format(DateTimeFormatter.ofPattern(StringConstants.EMAIL_DATE));
-      String nextDateStr = nextDate.format(DateTimeFormatter.ofPattern(StringConstants.EMAIL_DATE));
+      String dateStr = dateHelper.convertDateForEmail(newDate);
+      String nextDateStr = dateHelper.convertDateForEmail(maintenanceReminder.getScheduledDate());
       Map<String, Object> variables = new HashMap<>();
       variables.put("maintenanceNumber",maintenanceNumber);
       variables.put("itemName",itemName);
@@ -190,10 +186,8 @@ public class UpdateMaintenanceReminderScheduleCommandImpl implements UpdateMaint
       String abnormalAssetNumber = String.join(StringConstants.DELIMITER, abnormalAssetNumbers);
       String abnormalAssetStatus = String.join(StringConstants.DELIMITER, abnormalAssetStatuses);
       Date newDate = new Date();
-      LocalDate date = newDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      LocalDate nextDate = maintenanceReminder.getScheduledDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      String dateStr = date.format(DateTimeFormatter.ofPattern(StringConstants.EMAIL_DATE));
-      String nextDateStr = nextDate.format(DateTimeFormatter.ofPattern(StringConstants.EMAIL_DATE));
+      String dateStr = dateHelper.convertDateForEmail(newDate);
+      String nextDateStr = dateHelper.convertDateForEmail(maintenanceReminder.getScheduledDate());
       Map<String, Object> variables = new HashMap<>();
       variables.put("maintenanceNumber","-");
       variables.put("itemName",itemName);

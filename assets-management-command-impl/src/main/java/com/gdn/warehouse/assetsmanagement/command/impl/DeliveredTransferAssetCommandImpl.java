@@ -3,26 +3,33 @@ package com.gdn.warehouse.assetsmanagement.command.impl;
 import com.gdn.warehouse.assetsmanagement.command.DeliveredTransferAssetCommand;
 import com.gdn.warehouse.assetsmanagement.command.model.DeliveredTransferAssetCommandRequest;
 import com.gdn.warehouse.assetsmanagement.command.model.exception.CommandErrorException;
+import com.gdn.warehouse.assetsmanagement.entity.Item;
 import com.gdn.warehouse.assetsmanagement.entity.TransferAsset;
 import com.gdn.warehouse.assetsmanagement.enums.AssetStatus;
 import com.gdn.warehouse.assetsmanagement.enums.DocumentType;
 import com.gdn.warehouse.assetsmanagement.enums.TransferAssetStatus;
 import com.gdn.warehouse.assetsmanagement.enums.TransferAssetType;
 import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
+import com.gdn.warehouse.assetsmanagement.helper.SendEmailHelper;
 import com.gdn.warehouse.assetsmanagement.helper.TransferAssetHistoryHelper;
+import com.gdn.warehouse.assetsmanagement.helper.model.SendEmailHelperRequest;
 import com.gdn.warehouse.assetsmanagement.helper.model.TransferAssetHistoryHelperRequest;
 import com.gdn.warehouse.assetsmanagement.properties.StringConstants;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
+import com.gdn.warehouse.assetsmanagement.repository.ItemRepository;
 import com.gdn.warehouse.assetsmanagement.repository.TransferAssetRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -41,14 +48,26 @@ public class DeliveredTransferAssetCommandImpl implements DeliveredTransferAsset
    @Autowired
    private GenerateSequenceHelper generateSequenceHelper;
 
+   @Autowired
+   private SendEmailHelper sendEmailHelper;
+
+   @Autowired
+   private ItemRepository itemRepository;
+
    @Override
    public Mono<Boolean> execute(DeliveredTransferAssetCommandRequest request) {
       return transferAssetRepository.findByTransferAssetNumber(request.getTransferAssetNumber())
             .switchIfEmpty(Mono.defer(()->Mono.error(new CommandErrorException("Transfer Asset doesn't exist!", HttpStatus.BAD_REQUEST))))
             .flatMap(transferAsset -> updateTransferAssetStatus(transferAsset,request))
-            .flatMap(this::createReturnTransferAsset)
-            .doOnSuccess(transferAsset -> updateAssets(transferAsset.getAssetNumbers(),transferAsset.getDestination(),transferAsset.getTransferAssetType()))
-            .doOnSuccess(transferAsset -> saveToHistory(transferAsset,request))
+            .flatMap(transferAsset -> createReturnTransferAsset(transferAsset)
+                  .flatMap(transferAsset1 -> itemRepository.findByItemCode(transferAsset.getItemCode())
+                        .doOnSuccess(item -> {
+                           updateAssets(transferAsset.getAssetNumbers(),transferAsset.getDestination(),transferAsset.getTransferAssetType());
+                           saveToHistory(transferAsset,request);
+                           sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManagerDestination(transferAsset,item));
+                           sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManagerOrigin(transferAsset,item));
+                           sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(transferAsset,item));
+                        })))
             .map(result -> Boolean.TRUE);
    }
 
@@ -112,5 +131,58 @@ public class DeliveredTransferAssetCommandImpl implements DeliveredTransferAsset
                return asset;
             }).collectList()
             .flatMap(assets -> assetRepository.saveAll(assets).collectList()).subscribe();
+   }
+
+   private SendEmailHelperRequest toSendEmailHelperRequestWarehouseManagerDestination(TransferAsset transferAsset, Item item){
+      return SendEmailHelperRequest.builder()
+            .mailTemplateId("EMAIL_ASSETS_MANAGEMENT_TRANSFER_ASSET_DELIVERED")
+            .mailSubject("Delivered Transfer Asset")
+            .fromEmail(StringConstants.SENDER_EMAIL_ASSETS_MANAGEMENT)
+            //email warehouse
+            .toEmail(transferAsset.getDestinationWarehouseManagerEmail())
+            .identifierKey(StringConstants.TRANSFER_ASSET_NUMBER)
+            .identifierValue(transferAsset.getTransferAssetNumber())
+            .emailVariables(constructVariableForTemplate(transferAsset,item.getItemName(), "WH Manager "+transferAsset.getDestination()))
+            .build();
+   }
+
+   private SendEmailHelperRequest toSendEmailHelperRequestWarehouseManagerOrigin(TransferAsset transferAsset, Item item){
+      return SendEmailHelperRequest.builder()
+            .mailTemplateId("EMAIL_ASSETS_MANAGEMENT_TRANSFER_ASSET_DELIVERED")
+            .mailSubject("Delivered Transfer Asset")
+            .fromEmail(StringConstants.SENDER_EMAIL_ASSETS_MANAGEMENT)
+            //email warehouse
+            .toEmail(transferAsset.getOriginWarehouseManagerEmail())
+            .identifierKey(StringConstants.TRANSFER_ASSET_NUMBER)
+            .identifierValue(transferAsset.getTransferAssetNumber())
+            .emailVariables(constructVariableForTemplate(transferAsset,item.getItemName(), "WH Manager "+transferAsset.getOrigin()))
+            .build();
+   }
+
+   private SendEmailHelperRequest toSendEmailHelperRequestUser(TransferAsset transferAsset, Item item){
+      return SendEmailHelperRequest.builder()
+            .mailTemplateId("EMAIL_ASSETS_MANAGEMENT_TRANSFER_ASSET_DELIVERED")
+            .mailSubject("Delivered Transfer Asset")
+            .fromEmail(StringConstants.SENDER_EMAIL_ASSETS_MANAGEMENT)
+            .toEmail("jason.setiadi@gdn-commerce.com;")
+//            .toEmail(StringConstants.USER_EMAIL)
+            .identifierKey(StringConstants.TRANSFER_ASSET_NUMBER)
+            .identifierValue(transferAsset.getTransferAssetNumber())
+            .emailVariables(constructVariableForTemplate(transferAsset,item.getItemName(),"All"))
+            .build();
+   }
+
+   private Map<String, Object> constructVariableForTemplate(TransferAsset transferAsset, String itemName, String receiver) {
+      String assetNumbers = String.join(", ",transferAsset.getAssetNumbers());
+      Map<String, Object> variables = new HashMap<>();
+      variables.put("receiver",receiver);
+      variables.put("transferAssetNumber",transferAsset.getTransferAssetNumber());
+      variables.put("itemName",itemName);
+      variables.put("assetNumbers",assetNumbers);
+      variables.put("assetQuantity",transferAsset.getAssetNumbers().size());
+      variables.put("origin",transferAsset.getOrigin());
+      variables.put("destination",transferAsset.getDestination());
+      variables.put("notes", StringUtils.isEmpty(transferAsset.getNotes())?"-":transferAsset.getNotes());
+      return variables;
    }
 }

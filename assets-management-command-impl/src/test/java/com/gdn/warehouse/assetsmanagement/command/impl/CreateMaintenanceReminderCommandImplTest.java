@@ -9,6 +9,7 @@ import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.entity.Schedule;
 import com.gdn.warehouse.assetsmanagement.enums.DocumentType;
 import com.gdn.warehouse.assetsmanagement.helper.AssetValidatorHelper;
+import com.gdn.warehouse.assetsmanagement.helper.DateHelper;
 import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
@@ -21,14 +22,17 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -62,11 +66,15 @@ public class CreateMaintenanceReminderCommandImplTest {
    @Mock
    private ItemRepository itemRepository;
 
+   @Mock
+   private DateHelper dateHelper;
+
    private CreateMaintenanceReminderCommandRequest commandRequest;
    private MaintenanceReminder maintenanceReminder;
    private Asset asset;
    private Schedule schedule;
    private Item item;
+   private Calendar calendar;
 
    @Before
    public void setUp() throws Exception {
@@ -79,6 +87,7 @@ public class CreateMaintenanceReminderCommandImplTest {
             .itemCode("ITEM-CODE").build();
       schedule = Schedule.builder().build();
       item = Item.builder().itemName("NAME").itemCode("CODE").build();
+      calendar = Calendar.getInstance();
    }
 
    @Test
@@ -90,6 +99,7 @@ public class CreateMaintenanceReminderCommandImplTest {
       when(assetValidatorHelper.validateAssetForMaintenanceReminder(anyList())).thenReturn(Mono.just(Arrays.asList(asset)));
       when(assetRepository.saveAll(anyList())).thenReturn(Flux.just(asset));
       when(itemRepository.findByItemCode(anyString())).thenReturn(Mono.just(item));
+      when(dateHelper.validateScheduledDate(anyLong())).thenReturn(Mono.just(calendar));
       command.execute(commandRequest).block();
       verify(generateSequenceHelper).generateDocumentNumber(DocumentType.MAINTENANCE_REMINDER);
       verify(maintenanceReminderRepository).save(any(MaintenanceReminder.class));
@@ -98,11 +108,14 @@ public class CreateMaintenanceReminderCommandImplTest {
       verify(assetValidatorHelper).validateAssetForMaintenanceReminder(anyList());
       verify(assetRepository).saveAll(anyList());
       verify(itemRepository).findByItemCode(anyString());
+      verify(dateHelper).validateScheduledDate(anyLong());
    }
 
    @Test(expected = CommandErrorException.class)
    public void execute_fail_scheduledDate_before_now(){
       commandRequest.setScheduledDate(1L);
+      when(dateHelper.validateScheduledDate(anyLong()))
+            .thenReturn(Mono.error(new CommandErrorException("Scheduled Date can't be before today's date!", HttpStatus.BAD_REQUEST)));
       command.execute(commandRequest).block();
    }
 }

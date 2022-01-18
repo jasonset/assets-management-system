@@ -25,4 +25,5 @@ public class GetTransferAssetDetailWebResponse {
    private String referenceNumber;
    private String transferAssetType;
    private Date duration;
+   private Integer deliveryFee;
 }

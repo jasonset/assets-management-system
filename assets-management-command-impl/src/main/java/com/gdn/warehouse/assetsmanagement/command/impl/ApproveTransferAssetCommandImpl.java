@@ -3,10 +3,10 @@ package com.gdn.warehouse.assetsmanagement.command.impl;
 import com.gdn.warehouse.assetsmanagement.command.ApproveTransferAssetCommand;
 import com.gdn.warehouse.assetsmanagement.command.model.ApproveTransferAssetCommandRequest;
 import com.gdn.warehouse.assetsmanagement.command.model.exception.CommandErrorException;
-import com.gdn.warehouse.assetsmanagement.entity.Asset;
 import com.gdn.warehouse.assetsmanagement.entity.Item;
 import com.gdn.warehouse.assetsmanagement.entity.TransferAsset;
 import com.gdn.warehouse.assetsmanagement.enums.AssetStatus;
+import com.gdn.warehouse.assetsmanagement.enums.Identity;
 import com.gdn.warehouse.assetsmanagement.enums.TransferAssetStatus;
 import com.gdn.warehouse.assetsmanagement.enums.TransferAssetType;
 import com.gdn.warehouse.assetsmanagement.helper.SendEmailHelper;
@@ -83,6 +83,7 @@ public class ApproveTransferAssetCommandImpl implements ApproveTransferAssetComm
       if(BooleanUtils.isTrue(request.getApprove())){
          transferAsset.setStatus(TransferAssetStatus.APPROVED);
          sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManagerDestination(transferAsset,item.getItemName()));
+         sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(transferAsset,item.getItemName()));
       }else{
          transferAsset.setStatus(TransferAssetStatus.DECLINED);
       }
@@ -130,21 +131,40 @@ public class ApproveTransferAssetCommandImpl implements ApproveTransferAssetComm
 
    private SendEmailHelperRequest toSendEmailHelperRequestWarehouseManagerDestination(TransferAsset transferAsset, String itemName){
       return SendEmailHelperRequest.builder()
-            //TODO mailTemplate
-            .mailTemplateId("EMAIL_ASSETS_MANAGEMENT_TRANSFER_ASSET_WH_MANAGER_DESTINATION")
+            //TODO will arrive at warehouse/hub ${destination}
+            //TODO ${receiver} user
+            .mailTemplateId("EMAIL_ASSETS_MANAGEMENT_TRANSFER_ASSET_APPROVED")
             .mailSubject("Transfer Asset Notification")
             .fromEmail(StringConstants.SENDER_EMAIL_ASSETS_MANAGEMENT)
-            .toEmail("jason.setiadi@gdn-commerce.com;")
-//            .toEmail(transferAsset.getDestinationWarehouseManagerEmail())
+            .toEmail(transferAsset.getDestinationWarehouseManagerEmail())
             .identifierKey(StringConstants.TRANSFER_ASSET_NUMBER)
             .identifierValue(transferAsset.getTransferAssetNumber())
-            .emailVariables(constructVariableForTemplate(transferAsset,itemName))
+            .emailVariables(constructVariableForTemplate(transferAsset,itemName,Identity.WAREHOUSE_MANAGER))
             .build();
    }
 
-   private Map<String, Object> constructVariableForTemplate(TransferAsset transferAsset, String itemName) {
+   private SendEmailHelperRequest toSendEmailHelperRequestUser(TransferAsset transferAsset, String itemName){
+      return SendEmailHelperRequest.builder()
+            //TODO will arrive at warehouse/hub ${destination}
+            //TODO ${receiver} user
+            .mailTemplateId("EMAIL_ASSETS_MANAGEMENT_TRANSFER_ASSET_APPROVED")
+            .mailSubject("Transfer Asset Notification")
+            .fromEmail(StringConstants.SENDER_EMAIL_ASSETS_MANAGEMENT)
+            .toEmail(StringConstants.USER_EMAIL)
+            .identifierKey(StringConstants.TRANSFER_ASSET_NUMBER)
+            .identifierValue(transferAsset.getTransferAssetNumber())
+            .emailVariables(constructVariableForTemplate(transferAsset,itemName,Identity.USER))
+            .build();
+   }
+
+   private Map<String, Object> constructVariableForTemplate(TransferAsset transferAsset, String itemName, Identity identity) {
       String assetNumbers = String.join(", ",transferAsset.getAssetNumbers());
       Map<String, Object> variables = new HashMap<>();
+      if(Identity.USER.equals(identity)){
+         variables.put("receiver","All");
+      } else {
+         variables.put("receiver","WH Manager "+transferAsset.getDestination());
+      }
       variables.put("transferAssetNumber",transferAsset.getTransferAssetNumber());
       variables.put("itemName",itemName);
       variables.put("assetNumbers",assetNumbers);

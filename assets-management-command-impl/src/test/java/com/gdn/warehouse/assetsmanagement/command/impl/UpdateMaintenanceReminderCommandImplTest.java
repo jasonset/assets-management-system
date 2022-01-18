@@ -8,6 +8,7 @@ import com.gdn.warehouse.assetsmanagement.entity.Item;
 import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.entity.Schedule;
 import com.gdn.warehouse.assetsmanagement.helper.AssetValidatorHelper;
+import com.gdn.warehouse.assetsmanagement.helper.DateHelper;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.CreateScheduleHelperRequest;
@@ -27,6 +28,7 @@ import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -56,11 +58,15 @@ public class UpdateMaintenanceReminderCommandImplTest {
    @Mock
    private AssetRepository assetRepository;
 
+   @Mock
+   private DateHelper dateHelper;
+
    private UpdateMaintenanceReminderCommandRequest commandRequest;
    private MaintenanceReminder maintenanceReminder;
    private Asset asset,asset2,asset3;
    private Schedule schedule;
    private Item item;
+   private Calendar calendar;
 
    @Before
    public void setUp() throws Exception {
@@ -87,6 +93,7 @@ public class UpdateMaintenanceReminderCommandImplTest {
       asset3 = Asset.builder().assetNumber("ASSET-NUMBER3").location("LOCATION").poNumber("PO-NUMBER").poIssuedDate(new Date())
             .itemCode("ITEM-CODE").hasReminder(Boolean.FALSE).build();
       schedule = Schedule.builder().build();
+      calendar = Calendar.getInstance();
    }
 
    @Test
@@ -97,6 +104,7 @@ public class UpdateMaintenanceReminderCommandImplTest {
       when(assetRepository.findByAssetNumberIn(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
       when(assetRepository.saveAll(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
       when(scheduleHelper.saveSchedule(any(CreateScheduleHelperRequest.class))).thenReturn(Mono.just(schedule));
+      when(dateHelper.validateScheduledDate(anyLong())).thenReturn(Mono.just(calendar));
       doNothing().when(schedulerPlatformHelper).sendToSchedulerPlatform(any(Schedule.class));
       command.execute(commandRequest).block();
       verify(maintenanceReminderRepository).findByMaintenanceReminderNumber(anyString());
@@ -106,6 +114,7 @@ public class UpdateMaintenanceReminderCommandImplTest {
       verify(assetRepository,times(2)).saveAll(anyList());
       verify(scheduleHelper).saveSchedule(any(CreateScheduleHelperRequest.class));
       verify(schedulerPlatformHelper).sendToSchedulerPlatform(any(Schedule.class));
+      verify(dateHelper).validateScheduledDate(anyLong());
    }
 
    @Test
@@ -118,6 +127,7 @@ public class UpdateMaintenanceReminderCommandImplTest {
       when(assetRepository.findByAssetNumberIn(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
       when(assetRepository.saveAll(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
       when(scheduleHelper.cancelSchedule(anyString(),any())).thenReturn(Mono.just(schedule));
+      when(dateHelper.validateScheduledDate(anyLong())).thenReturn(Mono.just(calendar));
       doNothing().when(schedulerPlatformHelper).sendCancellationToSchedulerPlatform(any(Schedule.class));
       command.execute(commandRequest).block();
       verify(maintenanceReminderRepository).findByMaintenanceReminderNumber(anyString());
@@ -127,6 +137,7 @@ public class UpdateMaintenanceReminderCommandImplTest {
       verify(assetRepository,times(2)).saveAll(anyList());
       verify(scheduleHelper).cancelSchedule(anyString(),any());
       verify(schedulerPlatformHelper).sendCancellationToSchedulerPlatform(any(Schedule.class));
+      verify(dateHelper).validateScheduledDate(anyLong());
    }
 
    @Test
@@ -139,12 +150,14 @@ public class UpdateMaintenanceReminderCommandImplTest {
       when(assetRepository.saveAll(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
       doNothing().when(schedulerPlatformHelper).sendToSchedulerPlatform(any(Schedule.class));
       when(scheduleHelper.saveSchedule(any(CreateScheduleHelperRequest.class))).thenReturn(Mono.just(schedule));
+      when(dateHelper.validateScheduledDate(anyLong())).thenReturn(Mono.just(calendar));
       command.execute(commandRequest).block();
       verify(maintenanceReminderRepository).findByMaintenanceReminderNumber(anyString());
       verify(maintenanceReminderRepository).save(any(MaintenanceReminder.class));
       verify(assetValidatorHelper).validateAssetFromRequest(anyList());
       verify(assetRepository,times(2)).findByAssetNumberIn(anyList());
       verify(assetRepository,times(2)).saveAll(anyList());
+      verify(dateHelper).validateScheduledDate(anyLong());
    }
 
    @Test(expected = CommandErrorException.class)
@@ -156,12 +169,14 @@ public class UpdateMaintenanceReminderCommandImplTest {
       when(assetValidatorHelper.validateAssetFromRequest(anyList())).thenReturn(Mono.just(Arrays.asList(asset,asset3)));
       when(assetRepository.findByAssetNumberIn(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
       when(assetRepository.saveAll(anyList())).thenReturn(Flux.just(asset3)).thenReturn(Flux.just(asset2));
+      when(dateHelper.validateScheduledDate(anyLong())).thenReturn(Mono.just(calendar));
       command.execute(commandRequest).block();
       verify(maintenanceReminderRepository).findByMaintenanceReminderNumber(anyString());
       verify(maintenanceReminderRepository).save(any(MaintenanceReminder.class));
       verify(assetValidatorHelper).validateAssetFromRequest(anyList());
       verify(assetRepository,times(2)).findByAssetNumberIn(anyList());
       verify(assetRepository,times(2)).saveAll(anyList());
+      verify(dateHelper).validateScheduledDate(anyLong());
    }
 
    @Test
@@ -174,16 +189,11 @@ public class UpdateMaintenanceReminderCommandImplTest {
       when(assetValidatorHelper.validateAssetFromRequest(anyList())).thenReturn(Mono.just(Arrays.asList(asset,asset3)));
       when(scheduleHelper.saveSchedule(any(CreateScheduleHelperRequest.class))).thenReturn(Mono.just(schedule));
       doNothing().when(schedulerPlatformHelper).sendToSchedulerPlatform(any(Schedule.class));
+      when(dateHelper.validateScheduledDate(anyLong())).thenReturn(Mono.just(calendar));
       command.execute(commandRequest).block();
       verify(maintenanceReminderRepository).findByMaintenanceReminderNumber(anyString());
       verify(maintenanceReminderRepository).save(any(MaintenanceReminder.class));
       verify(assetValidatorHelper).validateAssetFromRequest(anyList());
-   }
-
-   @Test(expected = CommandErrorException.class)
-   public void execute_fail_scheduledDate_before_now(){
-      commandRequest.setScheduledDate(1L);
-      when(maintenanceReminderRepository.findByMaintenanceReminderNumber(anyString())).thenReturn(Mono.just(maintenanceReminder));
-      command.execute(commandRequest).block();
+      verify(dateHelper).validateScheduledDate(anyLong());
    }
 }

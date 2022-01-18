@@ -14,7 +14,7 @@ import com.gdn.warehouse.assetsmanagement.enums.Identity;
 import com.gdn.warehouse.assetsmanagement.enums.TransferAssetStatus;
 import com.gdn.warehouse.assetsmanagement.enums.TransferAssetType;
 import com.gdn.warehouse.assetsmanagement.helper.AssetValidatorHelper;
-import com.gdn.warehouse.assetsmanagement.helper.DateValidatorHelper;
+import com.gdn.warehouse.assetsmanagement.helper.DateHelper;
 import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
@@ -79,7 +79,7 @@ public class CreateTransferAssetCommandImpl implements CreateTransferAssetComman
    private ItemRepository itemRepository;
 
    @Autowired
-   private DateValidatorHelper dateValidatorHelper;
+   private DateHelper dateHelper;
 
    @Autowired
    private ScheduleHelper scheduleHelper;
@@ -95,7 +95,7 @@ public class CreateTransferAssetCommandImpl implements CreateTransferAssetComman
       if (TransferAssetType.MOVE.equals(request.getTransferAssetType())){
          return validateAssets(request,null);
       } else {
-         return dateValidatorHelper.validateScheduledDate(request.getDuration())
+         return dateHelper.validateScheduledDate(request.getDuration())
                .flatMap(calendar -> validateAssets(request,calendar));
       }
       //TODO kirim email ke warehouse manager dan user
@@ -107,9 +107,13 @@ public class CreateTransferAssetCommandImpl implements CreateTransferAssetComman
             .flatMap(assets ->  Mono.zip(createTransferAsset(request,assets.get(0).getLocation(),assets,assetNumbers,calendar),
                   systemParamRepository.findByKey(StringConstants.BASE_PATH_UI),
                   itemRepository.findByItemCode(assets.get(0).getItemCode())))
-            .doOnSuccess(tuple3 -> sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(tuple3)))
-            .doOnSuccess(tuple3 -> sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManagerOrigin(tuple3)))
-            .doOnSuccess(tuple3 -> assignScheduleToSchedulerPlatform(tuple3.getT1()))
+            .doOnSuccess(tuple3 -> {
+               sendEmailHelper.sendEmail(toSendEmailHelperRequestUser(tuple3));
+               sendEmailHelper.sendEmail(toSendEmailHelperRequestWarehouseManagerOrigin(tuple3));
+               if(TransferAssetType.BORROW.equals(tuple3.getT1().getTransferAssetType())){
+                  assignScheduleToSchedulerPlatform(tuple3.getT1());
+               }
+            })
             .map(tuple3 -> tuple3.getT1().getTransferAssetNumber())
             .onErrorMap(error -> new CommandErrorException(error.getMessage(), HttpStatus.BAD_REQUEST));
    }

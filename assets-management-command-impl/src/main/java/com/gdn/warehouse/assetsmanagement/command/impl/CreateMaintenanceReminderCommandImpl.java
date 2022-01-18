@@ -7,7 +7,7 @@ import com.gdn.warehouse.assetsmanagement.entity.Asset;
 import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.enums.DocumentType;
 import com.gdn.warehouse.assetsmanagement.helper.AssetValidatorHelper;
-import com.gdn.warehouse.assetsmanagement.helper.DateValidatorHelper;
+import com.gdn.warehouse.assetsmanagement.helper.DateHelper;
 import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
@@ -58,12 +58,12 @@ public class CreateMaintenanceReminderCommandImpl implements CreateMaintenanceRe
    private ItemRepository itemRepository;
 
    @Autowired
-   private DateValidatorHelper dateValidatorHelper;
+   private DateHelper dateHelper;
 
 
    @Override
    public Mono<String> execute(CreateMaintenanceReminderCommandRequest request) {
-      return dateValidatorHelper.validateScheduledDate(request.getScheduledDate())
+      return dateHelper.validateScheduledDate(request.getScheduledDate())
             .flatMap(calendar -> {
                List<String> assetNumbers = request.getAssetNumbers().stream().map(String::trim).distinct().collect(Collectors.toList());
                return assetValidatorHelper.validateAssetForMaintenanceReminder(assetNumbers)

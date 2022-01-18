@@ -7,7 +7,7 @@ import com.gdn.warehouse.assetsmanagement.command.model.exception.CommandErrorEx
 import com.gdn.warehouse.assetsmanagement.entity.Asset;
 import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.helper.AssetValidatorHelper;
-import com.gdn.warehouse.assetsmanagement.helper.DateValidatorHelper;
+import com.gdn.warehouse.assetsmanagement.helper.DateHelper;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.CreateScheduleHelperRequest;
@@ -55,11 +55,11 @@ public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceRe
    private AssetRepository assetRepository;
 
    @Autowired
-   private DateValidatorHelper dateValidatorHelper;
+   private DateHelper dateHelper;
 
    @Override
    public Mono<Boolean> execute(UpdateMaintenanceReminderCommandRequest request) {
-      return dateValidatorHelper.validateScheduledDate(request.getScheduledDate())
+      return dateHelper.validateScheduledDate(request.getScheduledDate())
             .flatMap(calendar -> maintenanceReminderRepository.findByMaintenanceReminderNumber(request.getMaintenanceReminderNumber())
                   .flatMap(maintenanceReminder -> {
                      List<String> assetNumbersRequest = request.getAssetNumbers().stream().map(String::trim).distinct().collect(Collectors.toList());

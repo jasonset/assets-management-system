@@ -53,7 +53,9 @@ public class GetTransferAssetDetailCommandImplTest {
             .origin("ORIGIN")
             .destination("DESTINATION")
             .status(TransferAssetStatus.PENDING)
-            .notes("NOTES").build();
+            .notes("NOTES")
+            .duration(new Date())
+            .deliveryFee(20000).build();
       item = Item.builder().itemName("NAME").itemCode("CODE").build();
    }
 

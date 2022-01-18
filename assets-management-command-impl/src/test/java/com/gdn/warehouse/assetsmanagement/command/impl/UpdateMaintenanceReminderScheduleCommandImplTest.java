@@ -8,6 +8,7 @@ import com.gdn.warehouse.assetsmanagement.entity.MaintenanceReminder;
 import com.gdn.warehouse.assetsmanagement.entity.Schedule;
 import com.gdn.warehouse.assetsmanagement.enums.AssetStatus;
 import com.gdn.warehouse.assetsmanagement.enums.DocumentType;
+import com.gdn.warehouse.assetsmanagement.helper.DateHelper;
 import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
 import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
@@ -35,6 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
@@ -66,8 +68,12 @@ public class UpdateMaintenanceReminderScheduleCommandImplTest {
 
    @Mock
    private AssetRepository assetRepository;
+
    @Mock
    private ItemRepository itemRepository;
+
+   @Mock
+   private DateHelper dateHelper;
 
    private UpdateMaintenanceReminderScheduleCommandRequest commandRequest;
    private MaintenanceReminder maintenanceReminder;
@@ -105,6 +111,7 @@ public class UpdateMaintenanceReminderScheduleCommandImplTest {
       when(assetRepository.findByAssetNumberIn(anyList())).thenReturn(Flux.just(asset));
       when(assetRepository.saveAll(anyList())).thenReturn(Flux.just(asset));
       when(itemRepository.findByItemCode(anyString())).thenReturn(Mono.just(item));
+      when(dateHelper.convertDateForEmail(any(Date.class))).thenReturn("Friday, 01 August 2029");
       command.execute(commandRequest).block();
       verify(maintenanceReminderRepository).findByMaintenanceReminderNumber(anyString());
       verify(scheduleRepository).findByIdentifier(anyString());
@@ -117,6 +124,7 @@ public class UpdateMaintenanceReminderScheduleCommandImplTest {
       verify(assetRepository).findByAssetNumberIn(anyList());
       verify(assetRepository).saveAll(anyList());
       verify(itemRepository).findByItemCode(anyString());
+      verify(dateHelper,times(2)).convertDateForEmail(any(Date.class));
    }
 
    @Test
