@@ -3,7 +3,7 @@
   <parent>
     <artifactId>assets-management-system</artifactId>
     <groupId>com.gdn.warehouse</groupId>
-    <version>0.0.22-SNAPSHOT</version>
+    <version>0.0.23-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>assets-management-client</artifactId>
@@ -171,13 +171,13 @@
     <dependency>
       <groupId>com.gdn.warehouse</groupId>
       <artifactId>assets-management-web-model</artifactId>
-      <version>0.0.22-SNAPSHOT</version>
+      <version>0.0.23-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.gdn.warehouse</groupId>
       <artifactId>assets-management-config</artifactId>
-      <version>0.0.22-SNAPSHOT</version>
+      <version>0.0.23-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
