@@ -79,7 +79,7 @@ public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceRe
                         }
                         return mono(()->assets);
                      }).flatMap(assets -> {
-                        now.setTime(new Date(request.getScheduledDate()));
+                        now.setTime(scheduledDate);
                         now.set(Calendar.HOUR_OF_DAY,8);
                         now.set(Calendar.MINUTE,0);
                         now.set(Calendar.SECOND,0);
