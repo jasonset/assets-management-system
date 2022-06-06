@@ -10,7 +10,6 @@ import com.gdn.warehouse.assetsmanagement.helper.TransferAssetHistoryHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.TransferAssetHistoryHelperRequest;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.TransferAssetRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +20,6 @@ import java.util.Date;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class OnDeliveryTransferAssetCommandImpl implements OnDeliveryTransferAssetCommand {
    @Autowired
    private TransferAssetRepository transferAssetRepository;

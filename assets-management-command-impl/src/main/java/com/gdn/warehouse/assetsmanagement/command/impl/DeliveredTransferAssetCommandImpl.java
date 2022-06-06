@@ -14,7 +14,6 @@ import com.gdn.warehouse.assetsmanagement.helper.model.TransferAssetHistoryHelpe
 import com.gdn.warehouse.assetsmanagement.properties.StringConstants;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.TransferAssetRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,7 +25,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class DeliveredTransferAssetCommandImpl implements DeliveredTransferAssetCommand {
 
    @Autowired

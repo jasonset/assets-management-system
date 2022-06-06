@@ -14,7 +14,6 @@ import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.MaintenanceReminderRepository;
 import com.gdn.warehouse.assetsmanagement.streaming.model.AssetsManagementTopics;
 import com.gdn.warehouse.assetsmanagement.streaming.model.MaintenanceReminderEvent;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class UpdateMaintenanceReminderCommandImpl implements UpdateMaintenanceReminderCommand {
 
    @Autowired

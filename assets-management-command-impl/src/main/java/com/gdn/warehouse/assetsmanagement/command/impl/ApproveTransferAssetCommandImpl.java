@@ -17,7 +17,6 @@ import com.gdn.warehouse.assetsmanagement.properties.StringConstants;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.ItemRepository;
 import com.gdn.warehouse.assetsmanagement.repository.TransferAssetRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +33,6 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class ApproveTransferAssetCommandImpl implements ApproveTransferAssetCommand {
 
    @Autowired

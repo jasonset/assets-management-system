@@ -9,7 +9,6 @@ import com.gdn.warehouse.assetsmanagement.helper.GenerateSequenceHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.GenerateAssetNumberRequest;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.WarehouseRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +22,6 @@ import java.util.Date;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class CreateAssetCommandImpl implements CreateAssetCommand {
    @Autowired
    private AssetRepository assetRepository;
