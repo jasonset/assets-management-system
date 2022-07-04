@@ -29,7 +29,6 @@ import com.gdn.warehouse.assetsmanagement.repository.TransferAssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.WarehouseRepository;
 import com.gdn.warehouse.assetsmanagement.streaming.model.AssetsManagementTopics;
 import com.gdn.warehouse.assetsmanagement.streaming.model.TransferAssetEvent;
-import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -51,7 +50,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class CreateTransferAssetCommandImpl implements CreateTransferAssetCommand {
 
    @Autowired

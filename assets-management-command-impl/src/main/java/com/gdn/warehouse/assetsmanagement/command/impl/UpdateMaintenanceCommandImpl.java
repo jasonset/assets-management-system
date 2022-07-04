@@ -16,7 +16,6 @@ import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.ItemRepository;
 import com.gdn.warehouse.assetsmanagement.repository.MaintenanceRepository;
 import com.gdn.warehouse.assetsmanagement.web.model.response.UpdateMaintenanceWebResponse;
-import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
@@ -33,7 +32,6 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class UpdateMaintenanceCommandImpl implements UpdateMaintenanceCommand {
 
    @Autowired
@@ -61,7 +59,7 @@ public class UpdateMaintenanceCommandImpl implements UpdateMaintenanceCommand {
                Boolean isNewStatus = Boolean.FALSE;
                MaintenanceStatus newStatus = updateStatus(maintenance,request);
                if(!newStatus.equals(maintenance.getStatus())){
-                  maintenance.setStatus(updateStatus(maintenance,request));
+                  maintenance.setStatus(newStatus);
                   isNewStatus = Boolean.TRUE;
                }
                maintenance.setMaintenanceFee(request.getMaintenanceFee());

@@ -10,7 +10,6 @@ import com.gdn.warehouse.assetsmanagement.helper.MaintenanceHistoryHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.MaintenanceHistoryHelperRequest;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.MaintenanceRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +22,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class RejectMaintenanceCommandImpl implements RejectMaintenanceCommand {
 
    @Autowired

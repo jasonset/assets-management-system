@@ -108,29 +108,4 @@ public class CreateAssetCommandImplTest {
       verify(warehouseRepository).findByWarehouseName(anyString());
    }
 
-//   @Test
-//   public void test_flux() throws InterruptedException {
-//      System.out.println("Starts");
-//
-//      //flux emits one element per second
-//      Flux<Character> flux = Flux.just('a', 'b', 'c', 'd')
-//            .delayElements(Duration.ofSeconds(1));
-//      //Observer 1 - takes 500ms to process
-//      flux
-//            .map(Character::toUpperCase)
-//            .subscribe(i -> {
-//               try {
-//                  sleep(500);
-//               } catch (InterruptedException e) {
-//                  e.printStackTrace();
-//               }
-//               log.info("Observer-1 : " + i);
-//            });
-//      //Observer 2 - process immediately
-//      flux.subscribe(i -> log.info("Observer-2 : " + i));
-//
-//      sleep(10000);
-//      System.out.println("Ends");
-//   }
-
 }

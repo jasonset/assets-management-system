@@ -10,7 +10,6 @@ import com.gdn.warehouse.assetsmanagement.helper.MaintenanceHistoryHelper;
 import com.gdn.warehouse.assetsmanagement.helper.model.MaintenanceHistoryHelperRequest;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.MaintenanceRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class ApproveMaintenanceRequestCommandImpl implements ApproveMaintenanceRequestCommand {
 
    @Autowired

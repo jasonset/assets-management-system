@@ -17,7 +17,6 @@ import com.gdn.warehouse.assetsmanagement.repository.ItemRepository;
 import com.gdn.warehouse.assetsmanagement.repository.MaintenanceReminderRepository;
 import com.gdn.warehouse.assetsmanagement.streaming.model.AssetsManagementTopics;
 import com.gdn.warehouse.assetsmanagement.streaming.model.MaintenanceReminderEvent;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class CreateMaintenanceReminderCommandImpl implements CreateMaintenanceReminderCommand {
 
    @Autowired

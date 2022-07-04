@@ -6,7 +6,6 @@ import com.gdn.warehouse.assetsmanagement.helper.ScheduleHelper;
 import com.gdn.warehouse.assetsmanagement.helper.SchedulerPlatformHelper;
 import com.gdn.warehouse.assetsmanagement.repository.AssetRepository;
 import com.gdn.warehouse.assetsmanagement.repository.MaintenanceReminderRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.util.Date;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class CancelMaintenanceReminderCommandImpl implements CancelMaintenanceReminderCommand {
 
    @Autowired
